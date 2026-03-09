@@ -2,13 +2,12 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// Проверка поддержки BackButton (для версий Telegram < 6.1 она отсутствует)
 if (tg.BackButton && tg.BackButton.show) {
     tg.BackButton.show();
     tg.BackButton.onClick(() => tg.close());
 }
 
-// Цвета темы Telegram
+// Цвета темы
 document.body.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#111');
 document.body.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#fff');
 document.body.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#555');
@@ -31,7 +30,7 @@ const SHAPES = [
     { shape: [[1,1,0],[0,1,1]], color: '#f00000' }  // Z
 ];
 
-// --- Класс Tetromino ---
+// ---------- КЛАСС TETROMINO ----------
 class Tetromino {
     constructor(shapeIndex) {
         const data = SHAPES[shapeIndex];
@@ -41,13 +40,12 @@ class Tetromino {
         this.y = 0;
     }
     rotate() {
-        // Поворот матрицы на 90 градусов по часовой стрелке
         const rotated = this.shape[0].map((_, i) => this.shape.map(row => row[i]).reverse());
         return rotated;
     }
 }
 
-// --- Класс Board (игровое поле) ---
+// ---------- КЛАСС BOARD ----------
 class Board {
     constructor() {
         this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -114,14 +112,14 @@ class Board {
     }
 }
 
-// --- Класс Game (основная логика) ---
+// ---------- КЛАСС GAME ----------
 class Game {
     constructor(canvas, nextCanvas, onGameOver) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.nextCanvas = nextCanvas;
         this.nextCtx = nextCanvas.getContext('2d');
-        this.board = new Board();
+        this.board = new Board();   // ← строка, где используется Board
         this.piece = null;
         this.nextPiece = null;
         this.gameOver = false;
@@ -242,7 +240,6 @@ class Game {
     continueAfterAd() {
         if (this.boardSnapshot) {
             this.board.grid = this.boardSnapshot.map(row => [...row]);
-            // Удаляем одну заполненную строку сверху (чтобы освободить место)
             for (let y = 0; y < ROWS; y++) {
                 if (this.board.grid[y].every(cell => cell !== null)) {
                     this.board.grid.splice(y, 1);
@@ -259,7 +256,7 @@ class Game {
     }
 }
 
-// --- Реклама (заглушка, позже заменим на AdsGram) ---
+// --- Реклама (заглушка) ---
 let adReady = false;
 function loadRewardedAd() {
     console.log('AdsGram: загрузка...');
@@ -294,7 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
         startNewGame(canvas, nextCanvas);
     });
 
-    // Клавиатура
     document.addEventListener('keydown', (e) => {
         if (!currentGame || currentGame.gameOver) return;
         switch(e.key) {
@@ -307,10 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
         currentGame.draw();
     });
 
-    // Свайпы
     setupSwipeControls(currentGame);
 
-    // Модалка Game Over
     document.getElementById('watch-ad').addEventListener('click', () => {
         showRewardedAd(() => {
             document.getElementById('game-over').classList.add('hidden');
@@ -322,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startNewGame(canvas, nextCanvas);
     });
 
-    loadRewardedAd(); // предзагрузка
+    loadRewardedAd();
 });
 
 function startNewGame(canvas, nextCanvas) {
