@@ -2,10 +2,15 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Тетрис с рекламой</title>
     <style>
         /* Базовые стили + Telegram theme */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
         body {
             margin: 0;
             padding: 0;
@@ -16,22 +21,26 @@
             background: var(--tg-theme-bg-color, #111);
             font-family: sans-serif;
             color: var(--tg-theme-text-color, white);
+            overflow: hidden; /* отключаем скролл всего документа */
+            position: fixed;
+            width: 100%;
+            height: 100%;
         }
         .menu, .game-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             width: 100%;
-            max-width: 400px;
-            padding: 20px;
+            max-width: 420px;
+            padding: 10px;
         }
         .menu.hidden, .game-wrapper.hidden {
             display: none;
         }
         .menu h1 {
             font-size: 48px;
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
         .menu button {
             background: var(--tg-theme-button-color, #4CAF50);
@@ -41,49 +50,61 @@
             border-radius: 10px;
             font-size: 24px;
             cursor: pointer;
+            width: 80%;
+            max-width: 300px;
         }
         .board-container {
             display: flex;
-            gap: 20px;
+            gap: 10px;
             justify-content: center;
             align-items: flex-start;
+            width: 100%;
         }
         canvas#board {
             background: #000;
             border: 2px solid var(--tg-theme-hint-color, #555);
             width: 300px;
             height: 600px;
+            touch-action: none; /* запрещаем браузерный скролл/зум на канвасе */
         }
         .next-piece {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 5px;
+        }
+        .next-piece span {
+            font-size: 14px;
         }
         canvas#nextCanvas {
             background: #000;
             border: 2px solid var(--tg-theme-hint-color, #555);
-            width: 120px;
-            height: 120px;
+            width: 90px;
+            height: 90px;
         }
         .info-panel {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
-            margin-top: 10px;
+            margin-top: 5px;
             gap: 10px;
             flex-wrap: wrap;
+            padding: 0 5px;
         }
         .info-panel div {
             font-size: 16px;
+            background: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
         }
         .info-panel button {
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            padding: 10px 15px;
+            padding: 10px 20px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
         }
         .overlay {
@@ -97,6 +118,7 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(3px);
         }
         .overlay.hidden {
             display: none;
@@ -104,21 +126,42 @@
         .modal {
             background: var(--tg-theme-bg-color, #333);
             color: var(--tg-theme-text-color, white);
-            padding: 30px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 15px;
             text-align: center;
             border: 2px solid var(--tg-theme-hint-color, #555);
+            width: 280px;
+            max-width: 90%;
+        }
+        .modal h2 {
+            margin-top: 0;
         }
         .modal button {
-            margin: 10px;
-            width: 200px;
+            margin: 8px 0;
+            width: 100%;
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            padding: 10px;
-            border-radius: 5px;
+            padding: 12px;
+            border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
+        }
+        .modal button:last-child {
+            margin-bottom: 0;
+        }
+        @media (max-width: 400px) {
+            canvas#board {
+                width: 250px;
+                height: 500px;
+            }
+            canvas#nextCanvas {
+                width: 70px;
+                height: 70px;
+            }
+            .info-panel div {
+                font-size: 14px;
+            }
         }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -130,22 +173,19 @@
         <button id="play-button">Играть</button>
     </div>
 
-    <!-- Игровой экран (изначально скрыт) -->
+    <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
             <div class="next-piece">
-                <div>Следующая</div>
+                <span>Следующая</span>
                 <canvas id="nextCanvas" width="120" height="120"></canvas>
             </div>
         </div>
         <div class="info-panel">
             <div>Счёт: <span id="score">0</span></div>
             <div>Уровень: <span id="level">0</span></div>
-            <div style="display: flex; gap: 10px;">
-                <button id="pause-button">Пауза</button>
-                <button id="new-game">Новая игра</button>
-            </div>
+            <button id="pause-button">Пауза</button>
         </div>
     </div>
 

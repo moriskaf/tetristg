@@ -113,13 +113,11 @@ class Board {
 
 // ---------- КЛАСС GAME ----------
 class Game {
-    // Статический мешок для равномерного распределения фигур
     static shapeBag = [];
     static bagIndex = 0;
 
     static getNextShapeIndex() {
         if (Game.shapeBag.length === 0 || Game.bagIndex >= Game.shapeBag.length) {
-            // Создаём новый мешок: [0,1,2,3,4,5,6] и перемешиваем
             Game.shapeBag = [0,1,2,3,4,5,6];
             for (let i = Game.shapeBag.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -322,11 +320,6 @@ document.getElementById('play-button').addEventListener('click', () => {
     startNewGame(canvas, nextCanvas);
 });
 
-// Кнопка "Новая игра" на игровом экране
-document.getElementById('new-game').addEventListener('click', () => {
-    startNewGame(canvas, nextCanvas);
-});
-
 // Кнопка "Пауза"
 const pauseButton = document.getElementById('pause-button');
 const pauseMenu = document.getElementById('pause-menu');
@@ -371,6 +364,11 @@ document.addEventListener('keydown', (e) => {
     currentGame.draw();
 });
 
+// Запрет скролла при касаниях холста
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+}, { passive: false });
+
 // Свайпы
 setupSwipeControls();
 
@@ -406,6 +404,7 @@ function setupSwipeControls() {
     let touchStartX = 0, touchStartY = 0;
     const minSwipe = 30;
     document.addEventListener('touchstart', (e) => {
+        if (gameWrapper.classList.contains('hidden') || !currentGame) return;
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
     });
