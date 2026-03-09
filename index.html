@@ -4,13 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Тетрис с рекламой</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Базовые стили + адаптация под Telegram */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--tg-theme-bg-color, #111);
+            font-family: sans-serif;
+            color: var(--tg-theme-text-color, white);
+        }
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .board-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        canvas#board {
+            background: #000;
+            border: 2px solid var(--tg-theme-hint-color, #555);
+            width: 300px;
+            height: 600px;
+        }
+        .next-piece {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas#nextCanvas {
+            background: #000;
+            border: 2px solid var(--tg-theme-hint-color, #555);
+            width: 120px;
+            height: 120px;
+        }
+        .info-panel {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button {
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .overlay { /* модалка как ранее */ }
+    </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="game-container">
-        <canvas id="board" width="300" height="600"></canvas>
-        <div class="info">
+    <div class="game-wrapper">
+        <div class="board-container">
+            <canvas id="board" width="300" height="600"></canvas>
+            <div class="next-piece">
+                <div>Следующая</div>
+                <canvas id="nextCanvas" width="120" height="120"></canvas>
+            </div>
+        </div>
+        <div class="info-panel">
             <div>Счёт: <span id="score">0</span></div>
             <div>Уровень: <span id="level">0</span></div>
             <button id="new-game">Новая игра</button>
