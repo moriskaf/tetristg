@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Тетрис с рекламой</title>
     <style>
-        /* Базовые стили + адаптация под Telegram */
+        /* Базовые стили + Telegram theme */
         body {
             margin: 0;
             padding: 0;
@@ -17,14 +17,30 @@
             font-family: sans-serif;
             color: var(--tg-theme-text-color, white);
         }
-        .game-wrapper {
+        .menu, .game-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            padding: 10px;
+            gap: 20px;
             width: 100%;
             max-width: 400px;
+            padding: 20px;
+        }
+        .menu.hidden, .game-wrapper.hidden {
+            display: none;
+        }
+        .menu h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .menu button {
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 24px;
+            cursor: pointer;
         }
         .board-container {
             display: flex;
@@ -55,7 +71,7 @@
             width: 100%;
             margin-top: 10px;
         }
-        button {
+        .info-panel button {
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
@@ -64,12 +80,52 @@
             font-size: 16px;
             cursor: pointer;
         }
-        .overlay { /* модалка как ранее */ }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .overlay.hidden {
+            display: none;
+        }
+        .modal {
+            background: var(--tg-theme-bg-color, #333);
+            color: var(--tg-theme-text-color, white);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid var(--tg-theme-hint-color, #555);
+        }
+        .modal button {
+            margin: 10px;
+            width: 200px;
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <div class="game-wrapper">
+    <!-- Меню -->
+    <div id="menu" class="menu">
+        <h1>Тетрис</h1>
+        <button id="play-button">Играть</button>
+    </div>
+
+    <!-- Игровой экран (изначально скрыт) -->
+    <div id="game-wrapper" class="game-wrapper hidden">
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
             <div class="next-piece">
@@ -83,6 +139,8 @@
             <button id="new-game">Новая игра</button>
         </div>
     </div>
+
+    <!-- Модалка Game Over -->
     <div id="game-over" class="overlay hidden">
         <div class="modal">
             <h2>Игра окончена</h2>
@@ -91,6 +149,7 @@
             <button id="restart">Начать заново</button>
         </div>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>

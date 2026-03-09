@@ -21,16 +21,16 @@ const BLOCK_SIZE = 30;
 
 // Фигуры
 const SHAPES = [
-    { shape: [[1,1,1,1]], color: '#00f0f0' }, // I
-    { shape: [[1,1],[1,1]], color: '#f0f000' }, // O
-    { shape: [[0,1,0],[1,1,1]], color: '#a000f0' }, // T
-    { shape: [[1,0,0],[1,1,1]], color: '#f0a000' }, // L
-    { shape: [[0,0,1],[1,1,1]], color: '#0000f0' }, // J
-    { shape: [[0,1,1],[1,1,0]], color: '#00f000' }, // S
-    { shape: [[1,1,0],[0,1,1]], color: '#f00000' }  // Z
+    { shape: [[1,1,1,1]], color: '#00f0f0' },
+    { shape: [[1,1],[1,1]], color: '#f0f000' },
+    { shape: [[0,1,0],[1,1,1]], color: '#a000f0' },
+    { shape: [[1,0,0],[1,1,1]], color: '#f0a000' },
+    { shape: [[0,0,1],[1,1,1]], color: '#0000f0' },
+    { shape: [[0,1,1],[1,1,0]], color: '#00f000' },
+    { shape: [[1,1,0],[0,1,1]], color: '#f00000' }
 ];
 
-// ---------- КЛАСС TETROMINO ----------
+// ---------- КЛАССЫ ----------
 class Tetromino {
     constructor(shapeIndex) {
         const data = SHAPES[shapeIndex];
@@ -40,12 +40,10 @@ class Tetromino {
         this.y = 0;
     }
     rotate() {
-        const rotated = this.shape[0].map((_, i) => this.shape.map(row => row[i]).reverse());
-        return rotated;
+        return this.shape[0].map((_, i) => this.shape.map(row => row[i]).reverse());
     }
 }
 
-// ---------- КЛАСС BOARD ----------
 class Board {
     constructor() {
         this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -112,14 +110,13 @@ class Board {
     }
 }
 
-// ---------- КЛАСС GAME ----------
 class Game {
     constructor(canvas, nextCanvas, onGameOver) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.nextCanvas = nextCanvas;
         this.nextCtx = nextCanvas.getContext('2d');
-        this.board = new Board();   // ← строка, где используется Board
+        this.board = new Board();
         this.piece = null;
         this.nextPiece = null;
         this.gameOver = false;
@@ -129,11 +126,9 @@ class Game {
         this.boardSnapshot = null;
         this.spawnNewPiece();
     }
-
     getIntervalTime() {
         return Math.max(100, 500 - this.board.level * 30);
     }
-
     spawnNewPiece() {
         if (!this.nextPiece) {
             this.nextPiece = new Tetromino(Math.floor(Math.random() * SHAPES.length));
@@ -149,7 +144,6 @@ class Game {
         }
         return true;
     }
-
     move(dx, dy) {
         if (this.gameOver || !this.piece) return false;
         const newX = this.piece.x + dx;
@@ -166,7 +160,6 @@ class Game {
         }
         return true;
     }
-
     rotate() {
         if (this.gameOver || !this.piece) return;
         const rotated = this.piece.rotate();
@@ -176,7 +169,6 @@ class Game {
             this.piece.shape = oldShape;
         }
     }
-
     lockPiece() {
         this.board.addPiece(this.piece);
         this.board.clearLines();
@@ -186,11 +178,9 @@ class Game {
         }
         if (!this.spawnNewPiece()) return;
     }
-
     drop() {
         while (this.move(0, 1)) {}
     }
-
     start(intervalTime) {
         this.interval = setInterval(() => {
             if (!this.paused && !this.gameOver) {
@@ -199,11 +189,9 @@ class Game {
             }
         }, intervalTime);
     }
-
     stop() {
         if (this.interval) clearInterval(this.interval);
     }
-
     draw() {
         this.board.draw(this.ctx);
         if (this.piece) {
@@ -216,7 +204,6 @@ class Game {
                 });
             });
         }
-        // Отрисовка следующей фигуры
         this.nextCtx.clearRect(0, 0, 120, 120);
         if (this.nextPiece) {
             const shape = this.nextPiece.shape;
@@ -236,7 +223,6 @@ class Game {
         document.getElementById('score').textContent = this.board.score;
         document.getElementById('level').textContent = this.board.level;
     }
-
     continueAfterAd() {
         if (this.boardSnapshot) {
             this.board.grid = this.boardSnapshot.map(row => [...row]);
@@ -279,45 +265,55 @@ function showRewardedAd(callback) {
     }, 3000);
 }
 
-// --- Инициализация игры ---
+// --- Инициализация ---
 let currentGame;
+const menu = document.getElementById('menu');
+const gameWrapper = document.getElementById('game-wrapper');
+const canvas = document.getElementById('board');
+const nextCanvas = document.getElementById('nextCanvas');
 
-document.addEventListener('DOMContentLoaded', () => {
-    const canvas = document.getElementById('board');
-    const nextCanvas = document.getElementById('nextCanvas');
+// Кнопка "Играть" в меню
+document.getElementById('play-button').addEventListener('click', () => {
+    menu.classList.add('hidden');
+    gameWrapper.classList.remove('hidden');
     startNewGame(canvas, nextCanvas);
-
-    document.getElementById('new-game').addEventListener('click', () => {
-        startNewGame(canvas, nextCanvas);
-    });
-
-    document.addEventListener('keydown', (e) => {
-        if (!currentGame || currentGame.gameOver) return;
-        switch(e.key) {
-            case 'ArrowLeft': currentGame.move(-1, 0); break;
-            case 'ArrowRight': currentGame.move(1, 0); break;
-            case 'ArrowDown': currentGame.move(0, 1); break;
-            case 'ArrowUp': currentGame.rotate(); break;
-            case ' ': currentGame.drop(); e.preventDefault(); break;
-        }
-        currentGame.draw();
-    });
-
-    setupSwipeControls(currentGame);
-
-    document.getElementById('watch-ad').addEventListener('click', () => {
-        showRewardedAd(() => {
-            document.getElementById('game-over').classList.add('hidden');
-            if (currentGame) currentGame.continueAfterAd();
-        });
-    });
-    document.getElementById('restart').addEventListener('click', () => {
-        document.getElementById('game-over').classList.add('hidden');
-        startNewGame(canvas, nextCanvas);
-    });
-
-    loadRewardedAd();
 });
+
+// Кнопка "Новая игра" на игровом экране
+document.getElementById('new-game').addEventListener('click', () => {
+    startNewGame(canvas, nextCanvas);
+});
+
+// Обработка клавиш
+document.addEventListener('keydown', (e) => {
+    if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
+    switch(e.key) {
+        case 'ArrowLeft': currentGame.move(-1, 0); break;
+        case 'ArrowRight': currentGame.move(1, 0); break;
+        case 'ArrowDown': currentGame.move(0, 1); break;
+        case 'ArrowUp': currentGame.rotate(); break;
+        case ' ': currentGame.drop(); e.preventDefault(); break;
+    }
+    currentGame.draw();
+});
+
+// Свайпы
+setupSwipeControls();
+
+// Модалка Game Over
+document.getElementById('watch-ad').addEventListener('click', () => {
+    showRewardedAd(() => {
+        document.getElementById('game-over').classList.add('hidden');
+        if (currentGame) currentGame.continueAfterAd();
+    });
+});
+document.getElementById('restart').addEventListener('click', () => {
+    document.getElementById('game-over').classList.add('hidden');
+    startNewGame(canvas, nextCanvas);
+});
+
+// Предзагрузка рекламы
+loadRewardedAd();
 
 function startNewGame(canvas, nextCanvas) {
     if (currentGame) currentGame.stop();
@@ -329,7 +325,7 @@ function startNewGame(canvas, nextCanvas) {
     currentGame.draw();
 }
 
-function setupSwipeControls(game) {
+function setupSwipeControls() {
     let touchStartX = 0, touchStartY = 0;
     const minSwipe = 30;
     document.addEventListener('touchstart', (e) => {
@@ -337,18 +333,18 @@ function setupSwipeControls(game) {
         touchStartY = e.touches[0].clientY;
     });
     document.addEventListener('touchend', (e) => {
-        if (!game || game.gameOver) return;
+        if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
         const dx = touchEndX - touchStartX;
         const dy = touchEndY - touchStartY;
         if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > minSwipe) {
-            if (dx > 0) game.move(1, 0);
-            else game.move(-1, 0);
+            if (dx > 0) currentGame.move(1, 0);
+            else currentGame.move(-1, 0);
         } else if (Math.abs(dy) > minSwipe) {
-            if (dy > 0) game.move(0, 1);
-            else game.rotate();
+            if (dy > 0) currentGame.move(0, 1);
+            else currentGame.rotate();
         }
-        game.draw();
+        currentGame.draw();
     });
 }
