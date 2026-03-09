@@ -67,17 +67,23 @@
         }
         .info-panel {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            align-items: center;
             width: 100%;
             margin-top: 10px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .info-panel div {
+            font-size: 16px;
         }
         .info-panel button {
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
         }
         .overlay {
@@ -136,7 +142,10 @@
         <div class="info-panel">
             <div>Счёт: <span id="score">0</span></div>
             <div>Уровень: <span id="level">0</span></div>
-            <button id="new-game">Новая игра</button>
+            <div style="display: flex; gap: 10px;">
+                <button id="pause-button">Пауза</button>
+                <button id="new-game">Новая игра</button>
+            </div>
         </div>
     </div>
 
@@ -147,6 +156,15 @@
             <p>Счёт: <span id="final-score"></span></p>
             <button id="watch-ad">Смотреть рекламу и продолжить</button>
             <button id="restart">Начать заново</button>
+        </div>
+    </div>
+
+    <!-- Модалка паузы -->
+    <div id="pause-menu" class="overlay hidden">
+        <div class="modal">
+            <h2>Пауза</h2>
+            <button id="resume-button">Продолжить</button>
+            <button id="exit-to-menu">Выйти в меню</button>
         </div>
     </div>
 

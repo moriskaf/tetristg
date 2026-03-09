@@ -30,7 +30,7 @@ const SHAPES = [
     { shape: [[1,1,0],[0,1,1]], color: '#f00000' }
 ];
 
-// ---------- КЛАССЫ ----------
+// ---------- КЛАСС TETROMINO ----------
 class Tetromino {
     constructor(shapeIndex) {
         const data = SHAPES[shapeIndex];
@@ -44,6 +44,7 @@ class Tetromino {
     }
 }
 
+// ---------- КЛАСС BOARD ----------
 class Board {
     constructor() {
         this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -110,7 +111,25 @@ class Board {
     }
 }
 
+// ---------- КЛАСС GAME ----------
 class Game {
+    // Статический мешок для равномерного распределения фигур
+    static shapeBag = [];
+    static bagIndex = 0;
+
+    static getNextShapeIndex() {
+        if (Game.shapeBag.length === 0 || Game.bagIndex >= Game.shapeBag.length) {
+            // Создаём новый мешок: [0,1,2,3,4,5,6] и перемешиваем
+            Game.shapeBag = [0,1,2,3,4,5,6];
+            for (let i = Game.shapeBag.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [Game.shapeBag[i], Game.shapeBag[j]] = [Game.shapeBag[j], Game.shapeBag[i]];
+            }
+            Game.bagIndex = 0;
+        }
+        return Game.shapeBag[Game.bagIndex++];
+    }
+
     constructor(canvas, nextCanvas, onGameOver) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
@@ -126,15 +145,17 @@ class Game {
         this.boardSnapshot = null;
         this.spawnNewPiece();
     }
+
     getIntervalTime() {
         return Math.max(100, 500 - this.board.level * 30);
     }
+
     spawnNewPiece() {
         if (!this.nextPiece) {
-            this.nextPiece = new Tetromino(Math.floor(Math.random() * SHAPES.length));
+            this.nextPiece = new Tetromino(Game.getNextShapeIndex());
         }
         this.piece = this.nextPiece;
-        this.nextPiece = new Tetromino(Math.floor(Math.random() * SHAPES.length));
+        this.nextPiece = new Tetromino(Game.getNextShapeIndex());
         if (this.board.collide(this.piece)) {
             this.boardSnapshot = this.board.grid.map(row => [...row]);
             this.gameOver = true;
@@ -144,8 +165,9 @@ class Game {
         }
         return true;
     }
+
     move(dx, dy) {
-        if (this.gameOver || !this.piece) return false;
+        if (this.gameOver || !this.piece || this.paused) return false;
         const newX = this.piece.x + dx;
         const newY = this.piece.y + dy;
         const oldX = this.piece.x;
@@ -160,8 +182,9 @@ class Game {
         }
         return true;
     }
+
     rotate() {
-        if (this.gameOver || !this.piece) return;
+        if (this.gameOver || !this.piece || this.paused) return;
         const rotated = this.piece.rotate();
         const oldShape = this.piece.shape;
         this.piece.shape = rotated;
@@ -169,6 +192,7 @@ class Game {
             this.piece.shape = oldShape;
         }
     }
+
     lockPiece() {
         this.board.addPiece(this.piece);
         this.board.clearLines();
@@ -178,9 +202,12 @@ class Game {
         }
         if (!this.spawnNewPiece()) return;
     }
+
     drop() {
+        if (this.gameOver || this.paused) return;
         while (this.move(0, 1)) {}
     }
+
     start(intervalTime) {
         this.interval = setInterval(() => {
             if (!this.paused && !this.gameOver) {
@@ -189,9 +216,23 @@ class Game {
             }
         }, intervalTime);
     }
+
     stop() {
         if (this.interval) clearInterval(this.interval);
     }
+
+    pause() {
+        if (this.gameOver) return;
+        this.paused = true;
+        this.stop();
+    }
+
+    resume() {
+        if (this.gameOver) return;
+        this.paused = false;
+        this.start(this.getIntervalTime());
+    }
+
     draw() {
         this.board.draw(this.ctx);
         if (this.piece) {
@@ -204,6 +245,7 @@ class Game {
                 });
             });
         }
+        // Отрисовка следующей фигуры
         this.nextCtx.clearRect(0, 0, 120, 120);
         if (this.nextPiece) {
             const shape = this.nextPiece.shape;
@@ -223,6 +265,7 @@ class Game {
         document.getElementById('score').textContent = this.board.score;
         document.getElementById('level').textContent = this.board.level;
     }
+
     continueAfterAd() {
         if (this.boardSnapshot) {
             this.board.grid = this.boardSnapshot.map(row => [...row]);
@@ -284,9 +327,40 @@ document.getElementById('new-game').addEventListener('click', () => {
     startNewGame(canvas, nextCanvas);
 });
 
+// Кнопка "Пауза"
+const pauseButton = document.getElementById('pause-button');
+const pauseMenu = document.getElementById('pause-menu');
+const resumeButton = document.getElementById('resume-button');
+const exitToMenu = document.getElementById('exit-to-menu');
+
+pauseButton.addEventListener('click', () => {
+    if (currentGame && !currentGame.gameOver && !currentGame.paused) {
+        currentGame.pause();
+        pauseMenu.classList.remove('hidden');
+    }
+});
+
+resumeButton.addEventListener('click', () => {
+    if (currentGame) {
+        currentGame.resume();
+        pauseMenu.classList.add('hidden');
+    }
+});
+
+exitToMenu.addEventListener('click', () => {
+    if (currentGame) {
+        currentGame.stop();
+        currentGame = null;
+    }
+    gameWrapper.classList.add('hidden');
+    menu.classList.remove('hidden');
+    pauseMenu.classList.add('hidden');
+});
+
 // Обработка клавиш
 document.addEventListener('keydown', (e) => {
     if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
+    if (currentGame.paused) return;
     switch(e.key) {
         case 'ArrowLeft': currentGame.move(-1, 0); break;
         case 'ArrowRight': currentGame.move(1, 0); break;
@@ -317,6 +391,9 @@ loadRewardedAd();
 
 function startNewGame(canvas, nextCanvas) {
     if (currentGame) currentGame.stop();
+    // Сбрасываем мешок для новой игры
+    Game.shapeBag = [];
+    Game.bagIndex = 0;
     currentGame = new Game(canvas, nextCanvas, (score) => {
         document.getElementById('final-score').textContent = score;
         document.getElementById('game-over').classList.remove('hidden');
@@ -333,7 +410,7 @@ function setupSwipeControls() {
         touchStartY = e.touches[0].clientY;
     });
     document.addEventListener('touchend', (e) => {
-        if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
+        if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden') || currentGame.paused) return;
         const touchEndX = e.changedTouches[0].clientX;
         const touchEndY = e.changedTouches[0].clientY;
         const dx = touchEndX - touchStartX;
