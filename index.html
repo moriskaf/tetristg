@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Тетрис с рекламой</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="board" width="300" height="600"></canvas>
+        <div class="info">
+            <div>Счёт: <span id="score">0</span></div>
+            <div>Уровень: <span id="level">0</span></div>
+            <button id="new-game">Новая игра</button>
+        </div>
+    </div>
+    <div id="game-over" class="overlay hidden">
+        <div class="modal">
+            <h2>Игра окончена</h2>
+            <p>Счёт: <span id="final-score"></span></p>
+            <button id="watch-ad">Смотреть рекламу и продолжить</button>
+            <button id="restart">Начать заново</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
