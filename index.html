@@ -31,7 +31,7 @@
             align-items: center;
             gap: 10px;
             width: 100%;
-            max-width: 460px;
+            max-width: 480px; /* чуть шире, чтобы вместить NEXT */
             padding: 10px 5px 0 5px;
             margin-top: env(safe-area-inset-top, 0);
         }
@@ -54,59 +54,54 @@
             max-width: 300px;
         }
 
-        /* Верхняя панель: SCORE и LVL ближе к центру, пауза справа */
+        /* Верхняя панель: SCORE и LVL по центру, пауза справа */
         .top-panel {
-            display: flex;
-            justify-content: flex-start;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
             align-items: center;
             width: 100%;
-            gap: 8px;
+            height: 44px; /* чуть выше для комфорта */
             margin-bottom: 5px;
-            height: 36px;
-            padding-left: 20px;   /* отступ слева для смещения к центру */
-            padding-right: 10px;
+        }
+        .center-indicators {
+            grid-column: 2;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
         }
         .info-block {
-            flex: 0 0 auto;
             background: rgba(255,255,255,0.1);
-            border-radius: 6px;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-width: 45px;       /* фиксированная ширина для компактности */
-            padding: 0 5px;
+            border-radius: 8px;
+            padding: 4px 12px;
+            text-align: center;
             backdrop-filter: blur(2px);
         }
-        .pause-block {
-            margin-left: auto;      /* прижимает кнопку паузы к правому краю */
-            height: 100%;
-            display: flex;
-            align-items: center;
-        }
         .info-label {
-            font-size: 8px;
+            font-size: 10px;
             opacity: 0.8;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            line-height: 1;
-            margin-bottom: 2px;
         }
         .info-value {
-            font-size: 14px;
+            font-size: 18px;
             font-weight: bold;
             color: var(--tg-theme-button-color, #4CAF50);
-            line-height: 1;
+            line-height: 1.2;
+        }
+        .pause-block {
+            grid-column: 3;
+            justify-self: end;
+            display: flex;
+            align-items: center;
         }
         #pause-button {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -114,42 +109,45 @@
             padding: 0;
         }
 
-        /* Контейнер поля + NEXT (поле центрируется, NEXT уменьшен и смещён правее) */
+        /* Контейнер поля и NEXT: поле строго по центру, NEXT справа */
         .board-container {
-            display: flex;
-            gap: 8px;
-            justify-content: center;
-            align-items: flex-start;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: start;
             width: 100%;
-            padding-left: 10px;     /* дополнительный сдвиг вправо для центрирования поля */
+            gap: 0px; /* без зазора между колонками */
         }
         canvas#board {
+            grid-column: 2;
             background: #000;
             border: 2px solid var(--tg-theme-hint-color, #555);
             width: 300px;
             height: 600px;
             touch-action: none;
+            justify-self: center;
         }
         .next-piece {
+            grid-column: 3;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            margin-left: auto;       /* прижимает NEXT к правому краю */
+            width: 70px; /* фиксированная ширина */
+            margin-left: 8px; /* небольшой отступ от поля */
         }
         .next-label {
-            font-size: 9px;          /* чуть меньше */
+            font-size: 10px;
             text-transform: uppercase;
             opacity: 0.8;
         }
         canvas#nextCanvas {
             background: #000;
             border: 2px solid var(--tg-theme-hint-color, #555);
-            width: 60px;             /* уменьшенный размер */
-            height: 60px;
+            width: 70px;
+            height: 70px;
         }
 
-        /* Панель управления (крест): поворот сверху, движение снизу */
+        /* Панель управления (крест) */
         .controls {
             display: flex;
             flex-direction: column;
@@ -232,37 +230,49 @@
         }
 
         /* Адаптация для узких экранов */
-        @media (max-width: 420px) {
+        @media (max-width: 460px) {
             .game-wrapper {
-                max-width: 360px;
+                max-width: 400px;
             }
             canvas#board {
                 width: 250px;
                 height: 500px;
             }
+            .next-piece {
+                width: 60px;
+            }
             canvas#nextCanvas {
-                width: 50px;          /* ещё меньше на узких экранах */
-                height: 50px;
+                width: 60px;
+                height: 60px;
             }
             .ctrl-btn {
                 width: 60px;
                 height: 60px;
                 font-size: 28px;
             }
+            .info-value {
+                font-size: 16px;
+            }
         }
-        @media (max-width: 350px) {
+        @media (max-width: 360px) {
             canvas#board {
                 width: 220px;
                 height: 440px;
             }
+            .next-piece {
+                width: 50px;
+            }
             canvas#nextCanvas {
-                width: 45px;
-                height: 45px;
+                width: 50px;
+                height: 50px;
             }
             .ctrl-btn {
                 width: 50px;
                 height: 50px;
                 font-size: 24px;
+            }
+            .info-value {
+                font-size: 14px;
             }
         }
     </style>
@@ -277,22 +287,25 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
-        <!-- Верхняя панель (SCORE и LVL ближе к центру) -->
+        <!-- Верхняя панель с центрированными индикаторами -->
         <div class="top-panel">
-            <div class="info-block">
-                <div class="info-label">SCORE</div>
-                <div class="info-value" id="score">0</div>
-            </div>
-            <div class="info-block">
-                <div class="info-label">LVL</div>
-                <div class="info-value" id="level">0</div>
+            <div></div> <!-- пустая левая колонка -->
+            <div class="center-indicators">
+                <div class="info-block">
+                    <div class="info-label">SCORE</div>
+                    <div class="info-value" id="score">0</div>
+                </div>
+                <div class="info-block">
+                    <div class="info-label">LVL</div>
+                    <div class="info-value" id="level">0</div>
+                </div>
             </div>
             <div class="pause-block">
                 <button id="pause-button" title="Пауза">⏸</button>
             </div>
         </div>
 
-        <!-- Поле (центрировано) + NEXT (уменьшен и прижат вправо) -->
+        <!-- Поле ровно по центру, NEXT справа -->
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
             <div class="next-piece">
@@ -303,7 +316,7 @@
 
         <!-- Кнопки крестом: поворот сверху, движение снизу -->
         <div class="controls">
-            <div class="ctrl-row"></div> <!-- пустой ряд для отступа -->
+            <div class="ctrl-row"></div>
             <div class="ctrl-row">
                 <button class="ctrl-btn" id="rotate">↻</button>
             </div>
