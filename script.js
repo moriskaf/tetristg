@@ -356,7 +356,33 @@ exitToMenu.addEventListener('click', () => {
     pauseMenu.classList.add('hidden');
 });
 
-// Обработка клавиш
+// --- Кнопки управления ---
+document.getElementById('move-left').addEventListener('click', () => {
+    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
+        currentGame.move(-1, 0);
+        currentGame.draw();
+    }
+});
+document.getElementById('move-right').addEventListener('click', () => {
+    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
+        currentGame.move(1, 0);
+        currentGame.draw();
+    }
+});
+document.getElementById('rotate').addEventListener('click', () => {
+    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
+        currentGame.rotate();
+        currentGame.draw();
+    }
+});
+document.getElementById('hard-drop').addEventListener('click', () => {
+    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
+        currentGame.drop();
+        currentGame.draw();
+    }
+});
+
+// --- Обработка клавиатуры ---
 document.addEventListener('keydown', (e) => {
     if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
     if (currentGame.paused) return;
@@ -370,15 +396,15 @@ document.addEventListener('keydown', (e) => {
     currentGame.draw();
 });
 
-// Запрет скролла при касаниях холста
+// --- Запрет скролла при касаниях холста ---
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
 }, { passive: false });
 
-// Свайпы
+// --- Свайпы (дополнительно, но можно оставить) ---
 setupSwipeControls();
 
-// Модалка Game Over
+// --- Модалка Game Over ---
 document.getElementById('watch-ad').addEventListener('click', () => {
     showRewardedAd(() => {
         document.getElementById('game-over').classList.add('hidden');
@@ -390,7 +416,7 @@ document.getElementById('restart').addEventListener('click', () => {
     startNewGame(canvas, nextCanvas);
 });
 
-// Предзагрузка рекламы
+// --- Предзагрузка рекламы ---
 loadRewardedAd();
 
 function startNewGame(canvas, nextCanvas) {

@@ -75,14 +75,13 @@
             align-items: center;
             backdrop-filter: blur(2px);
         }
-        /* Третий блок (для кнопки паузы) – выравнивание вправо, без фона */
         .pause-block {
             flex: 1;
             height: 100%;
             display: flex;
             justify-content: flex-end;
             align-items: center;
-            padding-right: 2px; /* небольшой отступ от правого края */
+            padding-right: 2px;
         }
         .info-label {
             font-size: 8px;
@@ -146,6 +145,37 @@
             height: 70px;
         }
 
+        /* Панель управления (кнопки) */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            margin-top: 12px;
+            margin-bottom: 5px;
+        }
+        .ctrl-btn {
+            width: 60px;
+            height: 60px;
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            border-radius: 12px;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            touch-action: manipulation;
+            user-select: none;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+        }
+        .ctrl-btn:active {
+            opacity: 0.7;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
         /* Модальные окна */
         .overlay {
             position: fixed;
@@ -204,6 +234,11 @@
                 width: 60px;
                 height: 60px;
             }
+            .ctrl-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
         }
         @media (max-width: 350px) {
             canvas#board {
@@ -213,6 +248,12 @@
             canvas#nextCanvas {
                 width: 50px;
                 height: 50px;
+            }
+            .ctrl-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+                gap: 8px;
             }
         }
     </style>
@@ -227,7 +268,7 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
-        <!-- Верхняя панель с кнопкой паузы справа -->
+        <!-- Верхняя панель -->
         <div class="top-panel">
             <div class="info-block">
                 <div class="info-label">SCORE</div>
@@ -249,6 +290,14 @@
                 <div class="next-label">NEXT</div>
                 <canvas id="nextCanvas" width="100" height="100"></canvas>
             </div>
+        </div>
+
+        <!-- Кнопки управления -->
+        <div class="controls">
+            <button class="ctrl-btn" id="move-left">←</button>
+            <button class="ctrl-btn" id="move-right">→</button>
+            <button class="ctrl-btn" id="rotate">↻</button>
+            <button class="ctrl-btn" id="hard-drop">⇓</button>
         </div>
     </div>
 
