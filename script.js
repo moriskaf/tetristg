@@ -171,7 +171,7 @@ class Board {
     }
 }
 
-// ---------- КЛАСС GAME (с эффектами) ----------
+// ---------- КЛАСС GAME (с отдельным анимационным циклом) ----------
 class Game {
     static shapeBag = [];
     static bagIndex = 0;
@@ -202,7 +202,21 @@ class Game {
         this.onGameOver = onGameOver;
         this.boardSnapshot = null;
         this.lockEffect = 0;
+        this.animationFrame = null;
         this.spawnNewPiece();
+        this.startAnimationLoop();
+    }
+
+    startAnimationLoop() {
+        const loop = () => {
+            if (!this.paused && !this.gameOver) {
+                // Обновляем частицы (независимо от игрового таймера)
+                this.board.particles.forEach(p => p.update());
+            }
+            this.draw(); // всегда отрисовываем текущее состояние
+            this.animationFrame = requestAnimationFrame(loop);
+        };
+        this.animationFrame = requestAnimationFrame(loop);
     }
 
     getIntervalTime() {
@@ -257,7 +271,7 @@ class Game {
         this.board.clearLines();
         this.lockEffect = 5;
         if (this.interval) {
-            this.stop();
+            this.stop(); // остановим интервал, чтобы перезапустить с новой скоростью
             this.start(this.getIntervalTime());
         }
         if (!this.spawnNewPiece()) return;
@@ -269,28 +283,34 @@ class Game {
     }
 
     start(intervalTime) {
+        // Запускаем только игровой интервал (движение вниз)
         this.interval = setInterval(() => {
             if (!this.paused && !this.gameOver) {
                 this.move(0, 1);
-                this.draw();
+                // Не вызываем draw() здесь, так как отрисовка идёт в RAF
             }
         }, intervalTime);
     }
 
     stop() {
         if (this.interval) clearInterval(this.interval);
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
+        }
     }
 
     pause() {
         if (this.gameOver) return;
         this.paused = true;
-        this.stop();
+        this.stop(); // останавливаем интервал и RAF (чтобы сэкономить ресурсы)
     }
 
     resume() {
         if (this.gameOver) return;
         this.paused = false;
         this.start(this.getIntervalTime());
+        this.startAnimationLoop(); // перезапускаем RAF
     }
 
     draw() {
@@ -376,6 +396,7 @@ class Game {
         this.gameOver = false;
         this.spawnNewPiece();
         this.start(this.getIntervalTime());
+        this.startAnimationLoop();
         this.draw();
     }
 }
