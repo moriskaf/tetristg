@@ -29,7 +29,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
             max-width: 460px;
             padding: 5px;
@@ -53,57 +53,58 @@
             max-width: 300px;
         }
 
-        /* Уменьшенная верхняя панель */
+        /* Сильно уменьшенная верхняя панель */
         .top-panel {
             display: flex;
             justify-content: space-between;
-            align-items: stretch;
+            align-items: center;
             width: 100%;
-            gap: 5px;
+            gap: 4px;
             margin-bottom: 5px;
+            height: 36px; /* фиксированная высота */
         }
         .info-block {
             flex: 1;
             background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 3px 1px;
-            text-align: center;
+            border-radius: 6px;
+            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-width: 0;
             backdrop-filter: blur(2px);
         }
         .info-label {
-            font-size: 9px;
+            font-size: 8px;
             opacity: 0.8;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            line-height: 1;
+            margin-bottom: 2px;
         }
         .info-value {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             color: var(--tg-theme-button-color, #4CAF50);
-            line-height: 1.2;
+            line-height: 1;
         }
         #pause-button {
-            width: 100%;
-            height: 100%;
+            width: 32px;
+            height: 32px;
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            border-radius: 8px;
-            font-size: 18px;
+            border-radius: 6px;
+            font-size: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            aspect-ratio: 1 / 1;
             padding: 0;
+            margin: 0 auto;
         }
 
-        /* Контейнер поля + NEXT (уменьшенный NEXT) */
+        /* Контейнер поля + NEXT */
         .board-container {
             display: flex;
             gap: 8px;
@@ -194,9 +195,6 @@
                 width: 60px;
                 height: 60px;
             }
-            .info-value {
-                font-size: 14px;
-            }
         }
         @media (max-width: 350px) {
             canvas#board {
@@ -206,12 +204,6 @@
             canvas#nextCanvas {
                 width: 50px;
                 height: 50px;
-            }
-            .info-label {
-                font-size: 8px;
-            }
-            .info-value {
-                font-size: 12px;
             }
         }
     </style>
@@ -236,12 +228,12 @@
                 <div class="info-label">LVL</div>
                 <div class="info-value" id="level">0</div>
             </div>
-            <div class="info-block" style="padding: 0;">
+            <div class="info-block" style="padding: 0; background: transparent; backdrop-filter: none;">
                 <button id="pause-button" title="Пауза">⏸</button>
             </div>
         </div>
 
-        <!-- Поле + NEXT (уменьшенный) -->
+        <!-- Поле + NEXT -->
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
             <div class="next-piece">
