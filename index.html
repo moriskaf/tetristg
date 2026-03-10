@@ -15,7 +15,7 @@
             padding: 0;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* прижимаем к верху */
+            align-items: flex-start;
             min-height: 100vh;
             background: var(--tg-theme-bg-color, #111);
             font-family: sans-serif;
@@ -32,8 +32,8 @@
             gap: 10px;
             width: 100%;
             max-width: 460px;
-            padding: 10px 5px 0 5px; /* отступ сверху 10px */
-            margin-top: env(safe-area-inset-top, 0); /* для iPhone */
+            padding: 10px 5px 0 5px;
+            margin-top: env(safe-area-inset-top, 0);
         }
         .menu.hidden, .game-wrapper.hidden {
             display: none;
@@ -54,7 +54,7 @@
             max-width: 300px;
         }
 
-        /* Сильно уменьшенная верхняя панель */
+        /* Верхняя панель */
         .top-panel {
             display: flex;
             justify-content: space-between;
@@ -62,7 +62,7 @@
             width: 100%;
             gap: 4px;
             margin-bottom: 5px;
-            height: 36px; /* фиксированная высота */
+            height: 36px;
         }
         .info-block {
             flex: 1;
@@ -74,6 +74,15 @@
             justify-content: center;
             align-items: center;
             backdrop-filter: blur(2px);
+        }
+        /* Третий блок (для кнопки паузы) – выравнивание вправо, без фона */
+        .pause-block {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding-right: 2px; /* небольшой отступ от правого края */
         }
         .info-label {
             font-size: 8px;
@@ -102,7 +111,6 @@
             justify-content: center;
             cursor: pointer;
             padding: 0;
-            margin: 0 auto;
         }
 
         /* Контейнер поля + NEXT */
@@ -219,7 +227,7 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
-        <!-- Уменьшенная верхняя панель -->
+        <!-- Верхняя панель с кнопкой паузы справа -->
         <div class="top-panel">
             <div class="info-block">
                 <div class="info-label">SCORE</div>
@@ -229,7 +237,7 @@
                 <div class="info-label">LVL</div>
                 <div class="info-value" id="level">0</div>
             </div>
-            <div class="info-block" style="padding: 0; background: transparent; backdrop-filter: none;">
+            <div class="pause-block">
                 <button id="pause-button" title="Пауза">⏸</button>
             </div>
         </div>
