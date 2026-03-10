@@ -29,10 +29,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             width: 100%;
-            max-width: 480px; /* чуть шире из-за next-поля */
-            padding: 8px;
+            max-width: 460px;
+            padding: 5px;
         }
         .menu.hidden, .game-wrapper.hidden {
             display: none;
@@ -53,20 +53,20 @@
             max-width: 300px;
         }
 
-        /* Верхняя панель (уменьшенная) */
+        /* Уменьшенная верхняя панель */
         .top-panel {
             display: flex;
             justify-content: space-between;
             align-items: stretch;
             width: 100%;
-            gap: 6px;
-            margin-bottom: 8px;
+            gap: 5px;
+            margin-bottom: 5px;
         }
         .info-block {
             flex: 1;
             background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 4px 2px;
+            border-radius: 8px;
+            padding: 3px 1px;
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -76,13 +76,13 @@
             backdrop-filter: blur(2px);
         }
         .info-label {
-            font-size: 10px;
+            font-size: 9px;
             opacity: 0.8;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .info-value {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: var(--tg-theme-button-color, #4CAF50);
             line-height: 1.2;
@@ -93,8 +93,8 @@
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            border-radius: 10px;
-            font-size: 22px;
+            border-radius: 8px;
+            font-size: 18px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -103,10 +103,10 @@
             padding: 0;
         }
 
-        /* Контейнер: поле + next-фигура */
+        /* Контейнер поля + NEXT (уменьшенный NEXT) */
         .board-container {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             justify-content: center;
             align-items: flex-start;
             width: 100%;
@@ -122,18 +122,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
         }
         .next-label {
-            font-size: 12px;
+            font-size: 10px;
             text-transform: uppercase;
             opacity: 0.8;
         }
         canvas#nextCanvas {
             background: #000;
             border: 2px solid var(--tg-theme-hint-color, #555);
-            width: 100px;
-            height: 100px;
+            width: 70px;
+            height: 70px;
         }
 
         /* Модальные окна */
@@ -181,21 +181,37 @@
             margin-bottom: 0;
         }
 
-        /* Адаптация для очень маленьких экранов */
-        @media (max-width: 440px) {
+        /* Адаптация для узких экранов */
+        @media (max-width: 420px) {
             .game-wrapper {
-                max-width: 400px;
+                max-width: 360px;
             }
             canvas#board {
                 width: 250px;
                 height: 500px;
             }
             canvas#nextCanvas {
-                width: 80px;
-                height: 80px;
+                width: 60px;
+                height: 60px;
             }
             .info-value {
-                font-size: 16px;
+                font-size: 14px;
+            }
+        }
+        @media (max-width: 350px) {
+            canvas#board {
+                width: 220px;
+                height: 440px;
+            }
+            canvas#nextCanvas {
+                width: 50px;
+                height: 50px;
+            }
+            .info-label {
+                font-size: 8px;
+            }
+            .info-value {
+                font-size: 12px;
             }
         }
     </style>
@@ -210,7 +226,7 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
-        <!-- Верхняя панель (уменьшенная) -->
+        <!-- Уменьшенная верхняя панель -->
         <div class="top-panel">
             <div class="info-block">
                 <div class="info-label">SCORE</div>
@@ -225,7 +241,7 @@
             </div>
         </div>
 
-        <!-- Поле + следующая фигура -->
+        <!-- Поле + NEXT (уменьшенный) -->
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
             <div class="next-piece">
