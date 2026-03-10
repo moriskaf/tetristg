@@ -52,7 +52,7 @@ class Board {
         this.level = 0;
         this.lines = 0;
         this.linesToAnimate = [];
-        this.animationTimer = 0;
+        this.animationTimer = 60;
     }
     addPiece(piece) {
         piece.shape.forEach((row, dy) => {
