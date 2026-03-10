@@ -208,6 +208,10 @@ class Game {
     }
 
     startAnimationLoop() {
+        // Останавливаем предыдущий цикл, если он был
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+        }
         const loop = () => {
             if (!this.paused && !this.gameOver) {
                 // Обновляем частицы (независимо от игрового таймера)
@@ -271,7 +275,7 @@ class Game {
         this.board.clearLines();
         this.lockEffect = 5;
         if (this.interval) {
-            this.stop(); // остановим интервал, чтобы перезапустить с новой скоростью
+            this.stop(); // останавливаем интервал, чтобы перезапустить с новой скоростью
             this.start(this.getIntervalTime());
         }
         if (!this.spawnNewPiece()) return;
@@ -303,7 +307,7 @@ class Game {
     pause() {
         if (this.gameOver) return;
         this.paused = true;
-        this.stop(); // останавливаем интервал и RAF (чтобы сэкономить ресурсы)
+        this.stop(); // останавливаем интервал и RAF
     }
 
     resume() {
