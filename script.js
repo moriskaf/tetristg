@@ -111,7 +111,7 @@ class Board {
     }
 }
 
-// ---------- КЛАСС GAME ----------
+// ---------- КЛАСС GAME (без nextPiece) ----------
 class Game {
     static shapeBag = [];
     static bagIndex = 0;
@@ -128,14 +128,11 @@ class Game {
         return Game.shapeBag[Game.bagIndex++];
     }
 
-    constructor(canvas, nextCanvas, onGameOver) {
+    constructor(canvas, onGameOver) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.nextCanvas = nextCanvas;
-        this.nextCtx = nextCanvas.getContext('2d');
         this.board = new Board();
         this.piece = null;
-        this.nextPiece = null;
         this.gameOver = false;
         this.paused = false;
         this.interval = null;
@@ -149,11 +146,8 @@ class Game {
     }
 
     spawnNewPiece() {
-        if (!this.nextPiece) {
-            this.nextPiece = new Tetromino(Game.getNextShapeIndex());
-        }
-        this.piece = this.nextPiece;
-        this.nextPiece = new Tetromino(Game.getNextShapeIndex());
+        // В упрощённом варианте просто создаём случайную фигуру
+        this.piece = new Tetromino(Game.getNextShapeIndex());
         if (this.board.collide(this.piece)) {
             this.boardSnapshot = this.board.grid.map(row => [...row]);
             this.gameOver = true;
@@ -243,23 +237,6 @@ class Game {
                 });
             });
         }
-        // Отрисовка следующей фигуры
-        this.nextCtx.clearRect(0, 0, 120, 120);
-        if (this.nextPiece) {
-            const shape = this.nextPiece.shape;
-            const color = this.nextPiece.color;
-            const blockSize = 20;
-            const offsetX = (120 - shape[0].length * blockSize) / 2;
-            const offsetY = (120 - shape.length * blockSize) / 2;
-            shape.forEach((row, dy) => {
-                row.forEach((value, dx) => {
-                    if (value) {
-                        this.nextCtx.fillStyle = color;
-                        this.nextCtx.fillRect(offsetX + dx * blockSize, offsetY + dy * blockSize, blockSize-1, blockSize-1);
-                    }
-                });
-            });
-        }
         document.getElementById('score').textContent = this.board.score;
         document.getElementById('level').textContent = this.board.level;
     }
@@ -311,13 +288,12 @@ let currentGame;
 const menu = document.getElementById('menu');
 const gameWrapper = document.getElementById('game-wrapper');
 const canvas = document.getElementById('board');
-const nextCanvas = document.getElementById('nextCanvas');
 
 // Кнопка "Играть" в меню
 document.getElementById('play-button').addEventListener('click', () => {
     menu.classList.add('hidden');
     gameWrapper.classList.remove('hidden');
-    startNewGame(canvas, nextCanvas);
+    startNewGame(canvas);
 });
 
 // Кнопка "Пауза"
@@ -381,18 +357,18 @@ document.getElementById('watch-ad').addEventListener('click', () => {
 });
 document.getElementById('restart').addEventListener('click', () => {
     document.getElementById('game-over').classList.add('hidden');
-    startNewGame(canvas, nextCanvas);
+    startNewGame(canvas);
 });
 
 // Предзагрузка рекламы
 loadRewardedAd();
 
-function startNewGame(canvas, nextCanvas) {
+function startNewGame(canvas) {
     if (currentGame) currentGame.stop();
     // Сбрасываем мешок для новой игры
     Game.shapeBag = [];
     Game.bagIndex = 0;
-    currentGame = new Game(canvas, nextCanvas, (score) => {
+    currentGame = new Game(canvas, (score) => {
         document.getElementById('final-score').textContent = score;
         document.getElementById('game-over').classList.remove('hidden');
     });

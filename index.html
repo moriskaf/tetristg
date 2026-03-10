@@ -21,7 +21,7 @@
             background: var(--tg-theme-bg-color, #111);
             font-family: sans-serif;
             color: var(--tg-theme-text-color, white);
-            overflow: hidden; /* отключаем скролл всего документа */
+            overflow: hidden;
             position: fixed;
             width: 100%;
             height: 100%;
@@ -30,9 +30,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
             padding: 10px;
         }
         .menu.hidden, .game-wrapper.hidden {
@@ -53,11 +53,45 @@
             width: 80%;
             max-width: 300px;
         }
+
+        /* Верхняя панель с информацией и кнопкой паузы */
+        .top-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            border-radius: 30px;
+        }
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-size: 18px;
+        }
+        .stats div span {
+            font-weight: bold;
+            color: var(--tg-theme-button-color, #4CAF50);
+        }
+        #pause-button {
+            background: var(--tg-theme-button-color, #4CAF50);
+            color: var(--tg-theme-button-text-color, white);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            line-height: 1;
+        }
+        /* Игровое поле по центру */
         .board-container {
             display: flex;
-            gap: 10px;
             justify-content: center;
-            align-items: flex-start;
             width: 100%;
         }
         canvas#board {
@@ -65,48 +99,9 @@
             border: 2px solid var(--tg-theme-hint-color, #555);
             width: 300px;
             height: 600px;
-            touch-action: none; /* запрещаем браузерный скролл/зум на канвасе */
+            touch-action: none;
         }
-        .next-piece {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-        .next-piece span {
-            font-size: 14px;
-        }
-        canvas#nextCanvas {
-            background: #000;
-            border: 2px solid var(--tg-theme-hint-color, #555);
-            width: 90px;
-            height: 90px;
-        }
-        .info-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-top: 5px;
-            gap: 10px;
-            flex-wrap: wrap;
-            padding: 0 5px;
-        }
-        .info-panel div {
-            font-size: 16px;
-            background: rgba(255,255,255,0.1);
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        .info-panel button {
-            background: var(--tg-theme-button-color, #4CAF50);
-            color: var(--tg-theme-button-text-color, white);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-        }
+
         .overlay {
             position: fixed;
             top: 0;
@@ -150,17 +145,15 @@
         .modal button:last-child {
             margin-bottom: 0;
         }
-        @media (max-width: 400px) {
+        /* Адаптация для маленьких экранов */
+        @media (max-width: 350px) {
             canvas#board {
                 width: 250px;
                 height: 500px;
             }
-            canvas#nextCanvas {
-                width: 70px;
-                height: 70px;
-            }
-            .info-panel div {
-                font-size: 14px;
+            .stats {
+                font-size: 16px;
+                gap: 10px;
             }
         }
     </style>
@@ -175,17 +168,18 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
+        <!-- Верхняя панель -->
+        <div class="top-panel">
+            <div class="stats">
+                <div>💰 <span id="score">0</span></div>
+                <div>📊 <span id="level">0</span></div>
+            </div>
+            <button id="pause-button" title="Пауза">⏸</button>
+        </div>
+
+        <!-- Центрированное поле -->
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
-            <div class="next-piece">
-                <span>Следующая</span>
-                <canvas id="nextCanvas" width="120" height="120"></canvas>
-            </div>
-        </div>
-        <div class="info-panel">
-            <div>Счёт: <span id="score">0</span></div>
-            <div>Уровень: <span id="level">0</span></div>
-            <button id="pause-button">Пауза</button>
         </div>
     </div>
 
