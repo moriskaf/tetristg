@@ -132,6 +132,7 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
+            margin-left: auto;
         }
         .next-label {
             font-size: 10px;
@@ -288,7 +289,7 @@
             </div>
         </div>
 
-        <!-- Поле + NEXT -->
+        <!-- Поле + NEXT (прижато к правому краю) -->
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
             <div class="next-piece">
@@ -297,19 +298,16 @@
             </div>
         </div>
 
-        <!-- Кнопки крестом -->
+        <!-- Кнопки крестом: поворот сверху, движение снизу -->
         <div class="controls">
-            <!-- Верхний ряд (пустой) -->
-            <div class="ctrl-row"></div>
-            <!-- Средний ряд: лево, поворот, право -->
+            <div class="ctrl-row"></div> <!-- отступ сверху -->
+            <div class="ctrl-row">
+                <button class="ctrl-btn" id="rotate">↻</button>
+            </div>
             <div class="ctrl-row">
                 <button class="ctrl-btn" id="move-left">←</button>
-                <button class="ctrl-btn" id="rotate">↻</button>
-                <button class="ctrl-btn" id="move-right">→</button>
-            </div>
-            <!-- Нижний ряд: вниз (мягкое падение) -->
-            <div class="ctrl-row">
                 <button class="ctrl-btn" id="soft-drop">↓</button>
+                <button class="ctrl-btn" id="move-right">→</button>
             </div>
         </div>
     </div>
