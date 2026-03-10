@@ -209,10 +209,9 @@ class Game {
     startAnimationLoop() {
         const loop = () => {
             if (!this.paused && !this.gameOver) {
-                // Обновляем частицы (независимо от игрового таймера)
                 this.board.particles.forEach(p => p.update());
             }
-            this.draw(); // всегда отрисовываем текущее состояние
+            this.draw();
             this.animationFrame = requestAnimationFrame(loop);
         };
         this.animationFrame = requestAnimationFrame(loop);
@@ -269,7 +268,6 @@ class Game {
         this.board.addPiece(this.piece);
         this.board.clearLines();
         this.lockEffect = 5;
-        // Перезапускаем интервал с учётом нового уровня
         if (this.interval) {
             clearInterval(this.interval);
             this.interval = setInterval(() => {
@@ -309,25 +307,21 @@ class Game {
         if (this.gameOver) return;
         this.paused = true;
         if (this.interval) clearInterval(this.interval);
-        // RAF продолжает работать, но particles.update() не вызывается из-за paused
     }
 
     resume() {
         if (this.gameOver) return;
         this.paused = false;
         this.start(this.getIntervalTime());
-        // RAF уже работает, просто снимаем paused
     }
 
     draw() {
         this.board.draw(this.ctx);
 
-        // Свечение активной фигуры
         if (this.piece && !this.gameOver) {
             this.ctx.shadowBlur = 15;
             this.ctx.shadowColor = this.piece.color + '80';
 
-            // Эффект установки (масштабирование)
             if (this.lockEffect > 0) {
                 const scale = 1 + 0.1 * (this.lockEffect / 5);
                 this.ctx.translate(
@@ -341,7 +335,6 @@ class Game {
                 );
             }
 
-            // Отрисовка активной фигуры
             this.piece.shape.forEach((row, dy) => {
                 row.forEach((value, dx) => {
                     if (value) {
@@ -351,7 +344,6 @@ class Game {
                 });
             });
 
-            // Сбрасываем трансформации и тени
             if (this.lockEffect > 0) {
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.lockEffect--;
@@ -360,7 +352,6 @@ class Game {
             this.ctx.shadowColor = 'transparent';
         }
 
-        // Отрисовка следующей фигуры
         this.drawNext();
         document.getElementById('score').textContent = this.board.score;
         document.getElementById('level').textContent = this.board.level;
@@ -402,8 +393,14 @@ class Game {
         this.gameOver = false;
         this.spawnNewPiece();
         this.start(this.getIntervalTime());
-        // RAF уже работает, не перезапускаем
         this.draw();
+    }
+}
+
+// --- Виброотклик ---
+function vibrate(pattern = 10) {
+    if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(pattern);
     }
 }
 
@@ -442,6 +439,7 @@ document.getElementById('play-button').addEventListener('click', () => {
     menu.classList.add('hidden');
     gameWrapper.classList.remove('hidden');
     startNewGame(canvas, nextCanvas);
+    vibrate(20); // короткая вибрация при старте игры
 });
 
 // Кнопка "Пауза"
@@ -454,6 +452,7 @@ pauseButton.addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused) {
         currentGame.pause();
         pauseMenu.classList.remove('hidden');
+        vibrate(10);
     }
 });
 
@@ -461,6 +460,7 @@ resumeButton.addEventListener('click', () => {
     if (currentGame) {
         currentGame.resume();
         pauseMenu.classList.add('hidden');
+        vibrate(10);
     }
 });
 
@@ -472,35 +472,40 @@ exitToMenu.addEventListener('click', () => {
     gameWrapper.classList.add('hidden');
     menu.classList.remove('hidden');
     pauseMenu.classList.add('hidden');
+    vibrate(10);
 });
 
-// --- Кнопки управления ---
+// --- Кнопки управления (с вибрацией) ---
 document.getElementById('move-left').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(-1, 0);
         currentGame.draw();
+        vibrate(5);
     }
 });
 document.getElementById('move-right').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(1, 0);
         currentGame.draw();
+        vibrate(5);
     }
 });
 document.getElementById('rotate').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.rotate();
         currentGame.draw();
+        vibrate(5);
     }
 });
 document.getElementById('soft-drop').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(0, 1);
         currentGame.draw();
+        vibrate(5);
     }
 });
 
-// --- Обработка клавиатуры (опционально) ---
+// --- Обработка клавиатуры (опционально, без вибрации) ---
 document.addEventListener('keydown', (e) => {
     if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
     if (currentGame.paused) return;
@@ -521,12 +526,14 @@ canvas.addEventListener('touchmove', (e) => {
 
 // --- Модалка Game Over ---
 document.getElementById('watch-ad').addEventListener('click', () => {
+    vibrate(15);
     showRewardedAd(() => {
         document.getElementById('game-over').classList.add('hidden');
         if (currentGame) currentGame.continueAfterAd();
     });
 });
 document.getElementById('restart').addEventListener('click', () => {
+    vibrate(15);
     document.getElementById('game-over').classList.add('hidden');
     startNewGame(canvas, nextCanvas);
 });
