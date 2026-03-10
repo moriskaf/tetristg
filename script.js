@@ -30,18 +30,32 @@ const SHAPES = [
     { shape: [[1,1,0],[0,1,1]], color: '#f00000' }
 ];
 
+// ---------- КЛАСС TETROMINO ----------
+class Tetromino {
+    constructor(shapeIndex) {
+        const data = SHAPES[shapeIndex];
+        this.shape = data.shape.map(row => [...row]);
+        this.color = data.color;
+        this.x = Math.floor((COLS - this.shape[0].length) / 2);
+        this.y = 0;
+    }
+    rotate() {
+        return this.shape[0].map((_, i) => this.shape.map(row => row[i]).reverse());
+    }
+}
+
 // ---------- КЛАСС ЧАСТИЦЫ ДЛЯ ВЗРЫВА ----------
 class Particle {
     constructor(x, y, color) {
         this.x = x;
         this.y = y;
-        this.vx = (Math.random() - 0.5) * 4; // скорость по X
-        this.vy = (Math.random() - 1) * 3;   // скорость по Y (в основном вверх)
-        this.size = Math.random() * 4 + 2;   // размер от 2 до 6
+        this.vx = (Math.random() - 0.5) * 4;
+        this.vy = (Math.random() - 1) * 3;
+        this.size = Math.random() * 4 + 2;
         this.color = color;
         this.alpha = 1;
-        this.life = 1; // от 1 до 0
-        this.decay = 0.02 + Math.random() * 0.03; // скорость затухания
+        this.life = 1;
+        this.decay = 0.02 + Math.random() * 0.03;
         this.rotation = Math.random() * Math.PI * 2;
         this.rotationSpeed = (Math.random() - 0.5) * 0.2;
     }
@@ -49,8 +63,8 @@ class Particle {
     update() {
         this.x += this.vx;
         this.y += this.vy;
-        this.vy += 0.1; // небольшая гравитация
-        this.vx *= 0.99; // трение
+        this.vy += 0.1;
+        this.vx *= 0.99;
         this.vy *= 0.99;
         this.life -= this.decay;
         this.alpha = this.life;
@@ -75,7 +89,7 @@ class Board {
         this.score = 0;
         this.level = 0;
         this.lines = 0;
-        this.particles = []; // массив частиц для анимации
+        this.particles = [];
     }
     addPiece(piece) {
         piece.shape.forEach((row, dy) => {
@@ -110,7 +124,6 @@ class Board {
                 // Создаём частицы для каждого блока в этой строке
                 for (let x = 0; x < COLS; x++) {
                     const color = this.grid[y][x];
-                    // Каждый блок разбиваем на несколько частиц
                     for (let i = 0; i < 5; i++) {
                         const px = x * BLOCK_SIZE + BLOCK_SIZE/2 + (Math.random() - 0.5) * 10;
                         const py = y * BLOCK_SIZE + BLOCK_SIZE/2 + (Math.random() - 0.5) * 10;
@@ -121,7 +134,6 @@ class Board {
                 this.grid.splice(y, 1);
                 this.grid.unshift(Array(COLS).fill(null));
                 cleared++;
-                // Не увеличиваем y, так как строка удалена
             } else {
                 y--;
             }
@@ -133,8 +145,8 @@ class Board {
         }
     }
     draw(ctx) {
-        // Отрисовка сетки
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        // Отрисовка клеток
         for (let y = 0; y < ROWS; y++) {
             for (let x = 0; x < COLS; x++) {
                 if (this.grid[y][x]) {
@@ -159,7 +171,7 @@ class Board {
     }
 }
 
-// ---------- КЛАСС GAME (с эффектами, без тени) ----------
+// ---------- КЛАСС GAME (с эффектами) ----------
 class Game {
     static shapeBag = [];
     static bagIndex = 0;
