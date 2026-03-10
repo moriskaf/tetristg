@@ -356,7 +356,7 @@ exitToMenu.addEventListener('click', () => {
     pauseMenu.classList.add('hidden');
 });
 
-// --- Кнопки управления ---
+// --- Кнопки управления (крест) ---
 document.getElementById('move-left').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(-1, 0);
@@ -375,9 +375,9 @@ document.getElementById('rotate').addEventListener('click', () => {
         currentGame.draw();
     }
 });
-document.getElementById('hard-drop').addEventListener('click', () => {
+document.getElementById('soft-drop').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
-        currentGame.drop();
+        currentGame.move(0, 1); // мягкое падение на одну клетку
         currentGame.draw();
     }
 });
@@ -391,7 +391,7 @@ document.addEventListener('keydown', (e) => {
         case 'ArrowRight': currentGame.move(1, 0); break;
         case 'ArrowDown': currentGame.move(0, 1); break;
         case 'ArrowUp': currentGame.rotate(); break;
-        case ' ': currentGame.drop(); e.preventDefault(); break;
+        case ' ': currentGame.drop(); e.preventDefault(); break; // быстрый сброс (hard drop) оставлен для пробела
     }
     currentGame.draw();
 });
@@ -401,7 +401,7 @@ canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
 }, { passive: false });
 
-// --- Свайпы (дополнительно, но можно оставить) ---
+// --- Свайпы (опционально) ---
 setupSwipeControls();
 
 // --- Модалка Game Over ---
