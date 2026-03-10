@@ -356,7 +356,7 @@ exitToMenu.addEventListener('click', () => {
     pauseMenu.classList.add('hidden');
 });
 
-// --- Кнопки управления (четыре) ---
+// --- Кнопки управления (крест) ---
 document.getElementById('move-left').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(-1, 0);

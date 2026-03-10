@@ -145,14 +145,20 @@
             height: 70px;
         }
 
-        /* Панель управления (четыре кнопки) */
+        /* Панель управления (крест) */
         .controls {
             display: flex;
-            justify-content: center;
-            gap: 12px;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
             width: 100%;
             margin-top: 12px;
             margin-bottom: 5px;
+        }
+        .ctrl-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
         }
         .ctrl-btn {
             width: 70px;
@@ -291,12 +297,20 @@
             </div>
         </div>
 
-        <!-- Четыре кнопки управления -->
+        <!-- Кнопки крестом -->
         <div class="controls">
-            <button class="ctrl-btn" id="move-left">←</button>
-            <button class="ctrl-btn" id="rotate">↻</button>
-            <button class="ctrl-btn" id="soft-drop">↓</button>
-            <button class="ctrl-btn" id="move-right">→</button>
+            <!-- Верхний ряд (пустой) -->
+            <div class="ctrl-row"></div>
+            <!-- Средний ряд: лево, поворот, право -->
+            <div class="ctrl-row">
+                <button class="ctrl-btn" id="move-left">←</button>
+                <button class="ctrl-btn" id="rotate">↻</button>
+                <button class="ctrl-btn" id="move-right">→</button>
+            </div>
+            <!-- Нижний ряд: вниз (мягкое падение) -->
+            <div class="ctrl-row">
+                <button class="ctrl-btn" id="soft-drop">↓</button>
+            </div>
         </div>
     </div>
 
