@@ -29,10 +29,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 15px;
             width: 100%;
-            max-width: 400px;
-            padding: 10px;
+            max-width: 480px; /* чуть шире из-за next-поля */
+            padding: 8px;
         }
         .menu.hidden, .game-wrapper.hidden {
             display: none;
@@ -53,36 +53,36 @@
             max-width: 300px;
         }
 
-        /* Верхняя панель из трёх блоков */
+        /* Верхняя панель (уменьшенная) */
         .top-panel {
             display: flex;
             justify-content: space-between;
             align-items: stretch;
             width: 100%;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 6px;
+            margin-bottom: 8px;
         }
         .info-block {
             flex: 1;
             background: rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 8px 5px;
+            border-radius: 10px;
+            padding: 4px 2px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-width: 0; /* для корректного сжатия */
+            min-width: 0;
             backdrop-filter: blur(2px);
         }
         .info-label {
-            font-size: 12px;
+            font-size: 10px;
             opacity: 0.8;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         .info-value {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: bold;
             color: var(--tg-theme-button-color, #4CAF50);
             line-height: 1.2;
@@ -93,19 +93,22 @@
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            border-radius: 12px;
-            font-size: 28px;
+            border-radius: 10px;
+            font-size: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            aspect-ratio: 1 / 1; /* квадратный блок */
+            aspect-ratio: 1 / 1;
             padding: 0;
         }
-        /* Контейнер поля */
+
+        /* Контейнер: поле + next-фигура */
         .board-container {
             display: flex;
+            gap: 10px;
             justify-content: center;
+            align-items: flex-start;
             width: 100%;
         }
         canvas#board {
@@ -115,6 +118,24 @@
             height: 600px;
             touch-action: none;
         }
+        .next-piece {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .next-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+        canvas#nextCanvas {
+            background: #000;
+            border: 2px solid var(--tg-theme-hint-color, #555);
+            width: 100px;
+            height: 100px;
+        }
+
         /* Модальные окна */
         .overlay {
             position: fixed;
@@ -159,16 +180,22 @@
         .modal button:last-child {
             margin-bottom: 0;
         }
-        @media (max-width: 350px) {
+
+        /* Адаптация для очень маленьких экранов */
+        @media (max-width: 440px) {
+            .game-wrapper {
+                max-width: 400px;
+            }
             canvas#board {
                 width: 250px;
                 height: 500px;
             }
-            .info-value {
-                font-size: 18px;
+            canvas#nextCanvas {
+                width: 80px;
+                height: 80px;
             }
-            .info-label {
-                font-size: 10px;
+            .info-value {
+                font-size: 16px;
             }
         }
     </style>
@@ -183,7 +210,7 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
-        <!-- Три блока сверху -->
+        <!-- Верхняя панель (уменьшенная) -->
         <div class="top-panel">
             <div class="info-block">
                 <div class="info-label">SCORE</div>
@@ -198,9 +225,13 @@
             </div>
         </div>
 
-        <!-- Центрированное поле -->
+        <!-- Поле + следующая фигура -->
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
+            <div class="next-piece">
+                <div class="next-label">NEXT</div>
+                <canvas id="nextCanvas" width="100" height="100"></canvas>
+            </div>
         </div>
     </div>
 
