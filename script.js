@@ -44,7 +44,7 @@ class Tetromino {
     }
 }
 
-// ---------- КЛАСС BOARD (с быстрой анимацией) ----------
+// ---------- КЛАСС BOARD (эффект «бум» за 3 кадра) ----------
 class Board {
     constructor() {
         this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -96,8 +96,8 @@ class Board {
             this.lines += cleared;
             this.score += cleared * 100 * (this.level + 1);
             this.level = Math.floor(this.lines / 10);
-            // ⚡ Быстрая анимация: всего 5 кадров (независимо от числа линий)
-            this.animationTimer = 5;
+            // Очень быстрая анимация: всего 3 кадра
+            this.animationTimer = 3;
         }
     }
     draw(ctx) {
@@ -115,17 +115,25 @@ class Board {
             }
         }
 
-        // Эффект «бум» — быстрая белая вспышка
+        // Эффект исчезновения (3 кадра)
         if (this.animationTimer > 0) {
-            const totalFrames = 5; // соответствует animationTimer
-            const progress = this.animationTimer / totalFrames; // от 1 до 0
-            // Альфа убывает от 0.9 до 0
-            ctx.globalAlpha = 0.9 * (1 - progress);
-            ctx.fillStyle = '#ffffff';
+            const step = 3 - this.animationTimer; // 0,1,2
+            if (step === 0) {
+                // Кадр 1: ярко-белый
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = '#ffffff';
+            } else if (step === 1) {
+                // Кадр 2: оранжевый полупрозрачный
+                ctx.globalAlpha = 0.7;
+                ctx.fillStyle = '#ffaa00';
+            } else {
+                // Кадр 3: прозрачный (почти незаметно, но для завершения)
+                ctx.globalAlpha = 0;
+            }
             this.linesToAnimate.forEach(y => {
                 ctx.fillRect(0, y * BLOCK_SIZE, ctx.canvas.width, BLOCK_SIZE-1);
             });
-            ctx.globalAlpha = 1.0;
+            ctx.globalAlpha = 1;
             this.animationTimer--;
             if (this.animationTimer === 0) {
                 this.linesToAnimate = [];
@@ -134,7 +142,7 @@ class Board {
     }
 }
 
-// ---------- КЛАСС GAME (с эффектами, но без тени) ----------
+// ---------- КЛАСС GAME (с эффектами, без тени) ----------
 class Game {
     static shapeBag = [];
     static bagIndex = 0;
