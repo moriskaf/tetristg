@@ -44,14 +44,14 @@ class Tetromino {
     }
 }
 
-// ---------- КЛАСС BOARD (с анимацией линий) ----------
+// ---------- КЛАСС BOARD (с улучшенной анимацией) ----------
 class Board {
     constructor() {
         this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
         this.score = 0;
         this.level = 0;
         this.lines = 0;
-        this.linesToAnimate = [];
+        this.linesToAnimate = []; // массив индексов строк для анимации
         this.animationTimer = 0;
     }
     addPiece(piece) {
@@ -96,7 +96,8 @@ class Board {
             this.lines += cleared;
             this.score += cleared * 100 * (this.level + 1);
             this.level = Math.floor(this.lines / 10);
-            this.animationTimer = 10; // 10 кадров анимации
+            // Увеличиваем длительность анимации в зависимости от количества удалённых линий
+            this.animationTimer = 12 + cleared * 2; // от 14 до 24 кадров
         }
     }
     draw(ctx) {
@@ -114,22 +115,47 @@ class Board {
             }
         }
 
-        // Анимация удаления линий
+        // Улучшенная анимация удаления строк (эффект взрыва)
         if (this.animationTimer > 0) {
-            ctx.globalAlpha = 0.3 * (this.animationTimer / 10);
-            ctx.fillStyle = '#ffffff';
+            // Прогресс анимации от 1 до 0
+            const progress = this.animationTimer / (12 + this.linesToAnimate.length * 2); // нормируем
+
+            // Резкая смена цвета: сначала ярко-белый, затем оранжевый, затем прозрачный
+            let alpha, r, g, b;
+            if (progress > 0.7) {
+                // Первая фаза: яркая белая вспышка
+                alpha = 0.9;
+                r = g = b = 255;
+            } else if (progress > 0.3) {
+                // Вторая фаза: оранжевое зарево
+                alpha = 0.7;
+                r = 255;
+                g = 150 + Math.floor(105 * (1 - progress)); // от 255 до 150
+                b = 50;
+            } else {
+                // Третья фаза: затухание
+                alpha = 0.3 * (progress / 0.3);
+                r = 255;
+                g = 100;
+                b = 50;
+            }
+
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
             this.linesToAnimate.forEach(y => {
                 ctx.fillRect(0, y * BLOCK_SIZE, ctx.canvas.width, BLOCK_SIZE-1);
             });
             ctx.globalAlpha = 1.0;
+
             this.animationTimer--;
-        } else {
-            this.linesToAnimate = [];
+            if (this.animationTimer === 0) {
+                this.linesToAnimate = [];
+            }
         }
     }
 }
 
-// ---------- КЛАСС GAME (с эффектами) ----------
+// ---------- КЛАСС GAME (с эффектами, но без тени) ----------
 class Game {
     static shapeBag = [];
     static bagIndex = 0;
@@ -159,7 +185,7 @@ class Game {
         this.interval = null;
         this.onGameOver = onGameOver;
         this.boardSnapshot = null;
-        this.lockEffect = 0; // для эффекта установки
+        this.lockEffect = 0;
         this.spawnNewPiece();
     }
 
@@ -213,7 +239,7 @@ class Game {
     lockPiece() {
         this.board.addPiece(this.piece);
         this.board.clearLines();
-        this.lockEffect = 5; // 5 кадров эффекта установки
+        this.lockEffect = 5;
         if (this.interval) {
             this.stop();
             this.start(this.getIntervalTime());
@@ -251,38 +277,11 @@ class Game {
         this.start(this.getIntervalTime());
     }
 
-    drawGhost() {
-        const originalX = this.piece.x;
-        const originalY = this.piece.y;
-        // Опускаем фигуру до столкновения
-        while (!this.board.collide(this.piece)) {
-            this.piece.y++;
-        }
-        this.piece.y--;
-
-        this.ctx.globalAlpha = 0.3;
-        this.piece.shape.forEach((row, dy) => {
-            row.forEach((value, dx) => {
-                if (value) {
-                    this.ctx.fillStyle = this.piece.color;
-                    this.ctx.fillRect((this.piece.x + dx) * BLOCK_SIZE, (this.piece.y + dy) * BLOCK_SIZE, BLOCK_SIZE-1, BLOCK_SIZE-1);
-                }
-            });
-        });
-        this.ctx.globalAlpha = 1.0;
-
-        this.piece.x = originalX;
-        this.piece.y = originalY;
-    }
-
     draw() {
         this.board.draw(this.ctx);
 
-        // Тень (проекция)
+        // Свечение активной фигуры (оставлено)
         if (this.piece && !this.gameOver) {
-            this.drawGhost();
-
-            // Свечение активной фигуры
             this.ctx.shadowBlur = 15;
             this.ctx.shadowColor = this.piece.color + '80';
 
