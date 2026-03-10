@@ -145,29 +145,23 @@
             height: 70px;
         }
 
-        /* Панель управления (крест) */
+        /* Панель управления (три кнопки) */
         .controls {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 12px;
             width: 100%;
             margin-top: 12px;
             margin-bottom: 5px;
         }
-        .ctrl-row {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-        }
         .ctrl-btn {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            border-radius: 12px;
-            font-size: 28px;
+            border-radius: 16px;
+            font-size: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -241,9 +235,9 @@
                 height: 60px;
             }
             .ctrl-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 24px;
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
             }
         }
         @media (max-width: 350px) {
@@ -256,9 +250,9 @@
                 height: 50px;
             }
             .ctrl-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 22px;
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
             }
         }
     </style>
@@ -297,19 +291,11 @@
             </div>
         </div>
 
-        <!-- Кнопки управления (крест) -->
+        <!-- Три кнопки управления -->
         <div class="controls">
-            <div class="ctrl-row">
-                <!-- Пустая ячейка для выравнивания, можно оставить просто отступ, но лучше использовать CSS Grid -->
-            </div>
-            <div class="ctrl-row">
-                <button class="ctrl-btn" id="move-left">←</button>
-                <button class="ctrl-btn" id="rotate">↻</button>
-                <button class="ctrl-btn" id="move-right">→</button>
-            </div>
-            <div class="ctrl-row">
-                <button class="ctrl-btn" id="soft-drop">↓</button>
-            </div>
+            <button class="ctrl-btn" id="move-left">←</button>
+            <button class="ctrl-btn" id="soft-drop">↓</button>
+            <button class="ctrl-btn" id="move-right">→</button>
         </div>
     </div>
 

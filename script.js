@@ -254,7 +254,7 @@ class Game {
         if (this.nextPiece) {
             const shape = this.nextPiece.shape;
             const color = this.nextPiece.color;
-            const blockSize = 20; // 100 / 5 = 20 (макс 5 клеток в ширину)
+            const blockSize = 20; // 100 / 5 = 20
             const cols = shape[0].length;
             const rows = shape.length;
             const offsetX = (100 - cols * blockSize) / 2;
@@ -356,7 +356,7 @@ exitToMenu.addEventListener('click', () => {
     pauseMenu.classList.add('hidden');
 });
 
-// --- Кнопки управления (крест) ---
+// --- Кнопки управления (три) ---
 document.getElementById('move-left').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(-1, 0);
@@ -369,12 +369,6 @@ document.getElementById('move-right').addEventListener('click', () => {
         currentGame.draw();
     }
 });
-document.getElementById('rotate').addEventListener('click', () => {
-    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
-        currentGame.rotate();
-        currentGame.draw();
-    }
-});
 document.getElementById('soft-drop').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(0, 1); // мягкое падение на одну клетку
@@ -382,7 +376,24 @@ document.getElementById('soft-drop').addEventListener('click', () => {
     }
 });
 
-// --- Обработка клавиатуры ---
+// --- Поворот по касанию поля ---
+canvas.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
+        currentGame.rotate();
+        currentGame.draw();
+    }
+});
+// Для мобильных touchstart срабатывает быстрее, но click тоже подходит. Используем оба, но с предотвращением двойного срабатывания.
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // предотвращаем скролл
+    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
+        currentGame.rotate();
+        currentGame.draw();
+    }
+}, { passive: false });
+
+// --- Обработка клавиатуры (оставим как опцию) ---
 document.addEventListener('keydown', (e) => {
     if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
     if (currentGame.paused) return;
@@ -391,18 +402,15 @@ document.addEventListener('keydown', (e) => {
         case 'ArrowRight': currentGame.move(1, 0); break;
         case 'ArrowDown': currentGame.move(0, 1); break;
         case 'ArrowUp': currentGame.rotate(); break;
-        case ' ': currentGame.drop(); e.preventDefault(); break; // быстрый сброс (hard drop) оставлен для пробела
+        case ' ': currentGame.drop(); e.preventDefault(); break; // быстрый сброс
     }
     currentGame.draw();
 });
 
-// --- Запрет скролла при касаниях холста ---
+// --- Запрет скролла при касаниях холста (дублируется, но оставим) ---
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
 }, { passive: false });
-
-// --- Свайпы (опционально) ---
-setupSwipeControls();
 
 // --- Модалка Game Over ---
 document.getElementById('watch-ad').addEventListener('click', () => {
@@ -430,29 +438,4 @@ function startNewGame(canvas, nextCanvas) {
     });
     currentGame.start(currentGame.getIntervalTime());
     currentGame.draw();
-}
-
-function setupSwipeControls() {
-    let touchStartX = 0, touchStartY = 0;
-    const minSwipe = 30;
-    document.addEventListener('touchstart', (e) => {
-        if (gameWrapper.classList.contains('hidden') || !currentGame) return;
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
-    });
-    document.addEventListener('touchend', (e) => {
-        if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden') || currentGame.paused) return;
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
-        const dx = touchEndX - touchStartX;
-        const dy = touchEndY - touchStartY;
-        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > minSwipe) {
-            if (dx > 0) currentGame.move(1, 0);
-            else currentGame.move(-1, 0);
-        } else if (Math.abs(dy) > minSwipe) {
-            if (dy > 0) currentGame.move(0, 1);
-            else currentGame.rotate();
-        }
-        currentGame.draw();
-    });
 }
