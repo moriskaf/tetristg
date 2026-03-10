@@ -2,17 +2,60 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-if (tg.BackButton && tg.BackButton.show) {
-    tg.BackButton.show();
-    tg.BackButton.onClick(() => tg.close());
+// --- Переменные темы (переопределяются настройками) ---
+let currentTheme = 'system'; // 'light', 'dark', 'system'
+let currentDifficulty = 'normal';
+
+// Загрузка настроек из localStorage
+function loadSettings() {
+    const savedTheme = localStorage.getItem('tetris_theme');
+    const savedDifficulty = localStorage.getItem('tetris_difficulty');
+    if (savedTheme) currentTheme = savedTheme;
+    if (savedDifficulty) currentDifficulty = savedDifficulty;
+    applyTheme();
+}
+function applyTheme() {
+    const body = document.body;
+    if (currentTheme === 'light') {
+        body.classList.add('light-theme');
+        // Отключаем цвета Telegram
+        body.style.setProperty('--tg-theme-bg-color', '#f0f0f0');
+        body.style.setProperty('--tg-theme-text-color', '#222');
+        body.style.setProperty('--tg-theme-hint-color', '#aaa');
+        body.style.setProperty('--tg-theme-button-color', '#007aff');
+        body.style.setProperty('--tg-theme-button-text-color', '#fff');
+    } else if (currentTheme === 'dark') {
+        body.classList.remove('light-theme');
+        body.style.setProperty('--tg-theme-bg-color', '#111');
+        body.style.setProperty('--tg-theme-text-color', '#fff');
+        body.style.setProperty('--tg-theme-hint-color', '#555');
+        body.style.setProperty('--tg-theme-button-color', '#4CAF50');
+        body.style.setProperty('--tg-theme-button-text-color', '#fff');
+    } else { // system - используем тему Telegram
+        body.classList.remove('light-theme');
+        body.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#111');
+        body.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#fff');
+        body.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#555');
+        body.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#4CAF50');
+        body.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#fff');
+    }
 }
 
-// Цвета темы
-document.body.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#111');
-document.body.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#fff');
-document.body.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#555');
-document.body.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#4CAF50');
-document.body.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#fff');
+// Сохранение настроек
+function saveSettings(theme, difficulty) {
+    currentTheme = theme;
+    currentDifficulty = difficulty;
+    localStorage.setItem('tetris_theme', theme);
+    localStorage.setItem('tetris_difficulty', difficulty);
+    applyTheme();
+}
+
+// --- Виброотклик ---
+function vibrate(pattern = 10) {
+    if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(pattern);
+    }
+}
 
 // Константы
 const COLS = 10;
@@ -44,7 +87,7 @@ class Tetromino {
     }
 }
 
-// ---------- КЛАСС ЧАСТИЦЫ ДЛЯ ВЗРЫВА ----------
+// ---------- КЛАСС ЧАСТИЦЫ ----------
 class Particle {
     constructor(x, y, color) {
         this.x = x;
@@ -59,7 +102,6 @@ class Particle {
         this.rotation = Math.random() * Math.PI * 2;
         this.rotationSpeed = (Math.random() - 0.5) * 0.2;
     }
-
     update() {
         this.x += this.vx;
         this.y += this.vy;
@@ -70,7 +112,6 @@ class Particle {
         this.alpha = this.life;
         this.rotation += this.rotationSpeed;
     }
-
     draw(ctx) {
         ctx.save();
         ctx.translate(this.x, this.y);
@@ -82,14 +123,15 @@ class Particle {
     }
 }
 
-// ---------- КЛАСС BOARD (с частицами) ----------
+// ---------- КЛАСС BOARD (с частицами и мусором) ----------
 class Board {
-    constructor() {
+    constructor(difficulty) {
         this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
         this.score = 0;
         this.level = 0;
         this.lines = 0;
         this.particles = [];
+        this.difficulty = difficulty || 'normal';
     }
     addPiece(piece) {
         piece.shape.forEach((row, dy) => {
@@ -117,11 +159,26 @@ class Board {
         }
         return false;
     }
+    // Добавление мусорной строки (для сложной сложности)
+    addGarbageLine() {
+        if (this.difficulty !== 'hard') return;
+        // С вероятностью 20% после каждой установки фигуры добавляем мусор
+        if (Math.random() > 0.2) return;
+        // Удаляем верхнюю строку и сдвигаем всё вверх, снизу добавляем мусор
+        this.grid.shift();
+        const garbageRow = Array(COLS).fill(null);
+        // Заполняем случайными блоками (кроме одного прохода)
+        for (let x = 0; x < COLS; x++) {
+            if (Math.random() > 0.3) { // 70% заполнено
+                garbageRow[x] = '#555'; // серый цвет мусора
+            }
+        }
+        this.grid.push(garbageRow);
+    }
     clearLines() {
         let cleared = 0;
         for (let y = ROWS - 1; y >= 0; ) {
             if (this.grid[y].every(cell => cell !== null)) {
-                // Создаём частицы для каждого блока в этой строке
                 for (let x = 0; x < COLS; x++) {
                     const color = this.grid[y][x];
                     for (let i = 0; i < 5; i++) {
@@ -130,7 +187,6 @@ class Board {
                         this.particles.push(new Particle(px, py, color));
                     }
                 }
-                // Удаляем строку
                 this.grid.splice(y, 1);
                 this.grid.unshift(Array(COLS).fill(null));
                 cleared++;
@@ -146,7 +202,6 @@ class Board {
     }
     draw(ctx) {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        // Отрисовка клеток
         for (let y = 0; y < ROWS; y++) {
             for (let x = 0; x < COLS; x++) {
                 if (this.grid[y][x]) {
@@ -158,8 +213,6 @@ class Board {
                 }
             }
         }
-
-        // Отрисовка и обновление частиц
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
             p.draw(ctx);
@@ -170,7 +223,7 @@ class Board {
     }
 }
 
-// ---------- КЛАСС GAME (с отдельным анимационным циклом) ----------
+// ---------- КЛАСС GAME (с учётом сложности) ----------
 class Game {
     static shapeBag = [];
     static bagIndex = 0;
@@ -187,12 +240,12 @@ class Game {
         return Game.shapeBag[Game.bagIndex++];
     }
 
-    constructor(canvas, nextCanvas, onGameOver) {
+    constructor(canvas, nextCanvas, onGameOver, difficulty) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
         this.nextCanvas = nextCanvas;
         this.nextCtx = nextCanvas.getContext('2d');
-        this.board = new Board();
+        this.board = new Board(difficulty);
         this.piece = null;
         this.nextPiece = null;
         this.gameOver = false;
@@ -202,8 +255,15 @@ class Game {
         this.boardSnapshot = null;
         this.lockEffect = 0;
         this.animationFrame = null;
+        this.difficulty = difficulty;
         this.spawnNewPiece();
         this.startAnimationLoop();
+    }
+
+    getIntervalTime() {
+        // Базовая скорость в зависимости от сложности
+        const baseSpeed = { easy: 600, normal: 500, hard: 400 }[this.difficulty] || 500;
+        return Math.max(100, baseSpeed - this.board.level * 30);
     }
 
     startAnimationLoop() {
@@ -215,10 +275,6 @@ class Game {
             this.animationFrame = requestAnimationFrame(loop);
         };
         this.animationFrame = requestAnimationFrame(loop);
-    }
-
-    getIntervalTime() {
-        return Math.max(100, 500 - this.board.level * 30);
     }
 
     spawnNewPiece() {
@@ -267,6 +323,10 @@ class Game {
     lockPiece() {
         this.board.addPiece(this.piece);
         this.board.clearLines();
+        // Добавляем мусор, если сложность hard
+        if (this.difficulty === 'hard') {
+            this.board.addGarbageLine();
+        }
         this.lockEffect = 5;
         if (this.interval) {
             clearInterval(this.interval);
@@ -293,14 +353,8 @@ class Game {
     }
 
     stop() {
-        if (this.interval) {
-            clearInterval(this.interval);
-            this.interval = null;
-        }
-        if (this.animationFrame) {
-            cancelAnimationFrame(this.animationFrame);
-            this.animationFrame = null;
-        }
+        if (this.interval) clearInterval(this.interval);
+        if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
     }
 
     pause() {
@@ -317,11 +371,9 @@ class Game {
 
     draw() {
         this.board.draw(this.ctx);
-
         if (this.piece && !this.gameOver) {
             this.ctx.shadowBlur = 15;
             this.ctx.shadowColor = this.piece.color + '80';
-
             if (this.lockEffect > 0) {
                 const scale = 1 + 0.1 * (this.lockEffect / 5);
                 this.ctx.translate(
@@ -334,7 +386,6 @@ class Game {
                     -(this.piece.y + this.piece.shape.length / 2) * BLOCK_SIZE
                 );
             }
-
             this.piece.shape.forEach((row, dy) => {
                 row.forEach((value, dx) => {
                     if (value) {
@@ -343,7 +394,6 @@ class Game {
                     }
                 });
             });
-
             if (this.lockEffect > 0) {
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.lockEffect--;
@@ -351,7 +401,6 @@ class Game {
             this.ctx.shadowBlur = 0;
             this.ctx.shadowColor = 'transparent';
         }
-
         this.drawNext();
         document.getElementById('score').textContent = this.board.score;
         document.getElementById('level').textContent = this.board.level;
@@ -397,13 +446,6 @@ class Game {
     }
 }
 
-// --- Виброотклик ---
-function vibrate(pattern = 10) {
-    if (window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate(pattern);
-    }
-}
-
 // --- Реклама (заглушка) ---
 let adReady = false;
 function loadRewardedAd() {
@@ -434,12 +476,46 @@ const gameWrapper = document.getElementById('game-wrapper');
 const canvas = document.getElementById('board');
 const nextCanvas = document.getElementById('nextCanvas');
 
-// Кнопка "Играть" в меню (PLAY)
+// Кнопки меню
 document.getElementById('play-button').addEventListener('click', () => {
     menu.classList.add('hidden');
     gameWrapper.classList.remove('hidden');
-    startNewGame(canvas, nextCanvas);
-    vibrate(20); // короткая вибрация при старте игры
+    startNewGame(canvas, nextCanvas, currentDifficulty);
+    vibrate(20);
+});
+
+document.getElementById('settings-button').addEventListener('click', () => {
+    document.getElementById('settings-modal').classList.remove('hidden');
+    // Установить активную кнопку темы
+    const theme = currentTheme;
+    document.querySelectorAll('.theme-buttons button').forEach(btn => btn.classList.remove('active'));
+    if (theme === 'light') document.getElementById('theme-light').classList.add('active');
+    else if (theme === 'dark') document.getElementById('theme-dark').classList.add('active');
+    else document.getElementById('theme-system').classList.add('active');
+    document.getElementById('difficulty-select').value = currentDifficulty;
+});
+
+// Настройки
+document.getElementById('theme-light').addEventListener('click', () => {
+    document.querySelectorAll('.theme-buttons button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('theme-light').classList.add('active');
+});
+document.getElementById('theme-dark').addEventListener('click', () => {
+    document.querySelectorAll('.theme-buttons button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('theme-dark').classList.add('active');
+});
+document.getElementById('theme-system').addEventListener('click', () => {
+    document.querySelectorAll('.theme-buttons button').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('theme-system').classList.add('active');
+});
+document.getElementById('save-settings').addEventListener('click', () => {
+    let theme = 'system';
+    if (document.getElementById('theme-light').classList.contains('active')) theme = 'light';
+    else if (document.getElementById('theme-dark').classList.contains('active')) theme = 'dark';
+    const difficulty = document.getElementById('difficulty-select').value;
+    saveSettings(theme, difficulty);
+    document.getElementById('settings-modal').classList.add('hidden');
+    vibrate(10);
 });
 
 // Кнопка "Пауза"
@@ -475,7 +551,7 @@ exitToMenu.addEventListener('click', () => {
     vibrate(10);
 });
 
-// --- Кнопки управления (с вибрацией) ---
+// Кнопки управления
 document.getElementById('move-left').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(-1, 0);
@@ -505,7 +581,7 @@ document.getElementById('soft-drop').addEventListener('click', () => {
     }
 });
 
-// --- Обработка клавиатуры (опционально, без вибрации) ---
+// Клавиатура
 document.addEventListener('keydown', (e) => {
     if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
     if (currentGame.paused) return;
@@ -519,12 +595,10 @@ document.addEventListener('keydown', (e) => {
     currentGame.draw();
 });
 
-// --- Запрет скролла при касаниях холста ---
-canvas.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-}, { passive: false });
+// Запрет скролла
+canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 
-// --- Модалка Game Over ---
+// Модалки Game Over
 document.getElementById('watch-ad').addEventListener('click', () => {
     vibrate(15);
     showRewardedAd(() => {
@@ -535,24 +609,33 @@ document.getElementById('watch-ad').addEventListener('click', () => {
 document.getElementById('restart').addEventListener('click', () => {
     vibrate(15);
     document.getElementById('game-over').classList.add('hidden');
-    startNewGame(canvas, nextCanvas);
+    startNewGame(canvas, nextCanvas, currentDifficulty);
 });
 
-// --- Предзагрузка рекламы ---
+// Закрытие модалок по клику вне (не обязательно, но можно)
+document.querySelectorAll('.overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.classList.add('hidden');
+        }
+    });
+});
+
+// Загрузка настроек и предзагрузка рекламы
+loadSettings();
 loadRewardedAd();
 
-function startNewGame(canvas, nextCanvas) {
+function startNewGame(canvas, nextCanvas, difficulty) {
     if (currentGame) {
         currentGame.stop();
         currentGame = null;
     }
-    // Сбрасываем мешок для новой игры
     Game.shapeBag = [];
     Game.bagIndex = 0;
     currentGame = new Game(canvas, nextCanvas, (score) => {
         document.getElementById('final-score').textContent = score;
         document.getElementById('game-over').classList.remove('hidden');
-    });
+    }, difficulty);
     currentGame.start(currentGame.getIntervalTime());
     currentGame.draw();
 }
