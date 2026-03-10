@@ -147,14 +147,11 @@
             height: 70px;
         }
 
-        /* Панель управления как на клавиатуре: поворот сверху, три кнопки снизу */
+        /* Панель управления: четыре кнопки в ряд */
         .controls {
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            grid-template-rows: auto auto;
-            gap: 8px;
-            justify-items: center;
-            align-items: center;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
             width: 100%;
             margin-top: 12px;
             margin-bottom: 5px;
@@ -179,23 +176,6 @@
             opacity: 0.7;
             transform: translateY(2px);
             box-shadow: 0 2px 0 rgba(0,0,0,0.2);
-        }
-        /* Распределение кнопок */
-        #rotate {
-            grid-column: 2;
-            grid-row: 1;
-        }
-        #move-left {
-            grid-column: 1;
-            grid-row: 2;
-        }
-        #soft-drop {
-            grid-column: 2;
-            grid-row: 2;
-        }
-        #move-right {
-            grid-column: 3;
-            grid-row: 2;
         }
 
         /* Модальные окна */
@@ -328,18 +308,33 @@
             </div>
         </div>
 
-        <!-- Кнопки управления в точности как на клавиатуре -->
+        <!-- Кнопки управления: четыре в ряд -->
         <div class="controls">
-            <button class="ctrl-btn" id="rotate">↻</button>
             <button class="ctrl-btn" id="move-left">←</button>
+            <button class="ctrl-btn" id="rotate">↻</button>
             <button class="ctrl-btn" id="soft-drop">↓</button>
             <button class="ctrl-btn" id="move-right">→</button>
         </div>
     </div>
 
-    <!-- Модалки -->
-    <div id="game-over" class="overlay hidden">...</div>
-    <div id="pause-menu" class="overlay hidden">...</div>
+    <!-- Модалка Game Over -->
+    <div id="game-over" class="overlay hidden">
+        <div class="modal">
+            <h2>Игра окончена</h2>
+            <p>Счёт: <span id="final-score"></span></p>
+            <button id="watch-ad">Смотреть рекламу и продолжить</button>
+            <button id="restart">Начать заново</button>
+        </div>
+    </div>
+
+    <!-- Модалка паузы -->
+    <div id="pause-menu" class="overlay hidden">
+        <div class="modal">
+            <h2>Пауза</h2>
+            <button id="resume-button">Продолжить</button>
+            <button id="exit-to-menu">Выйти в меню</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
