@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Тетрис с рекламой</title>
     <style>
-        /* Базовые стили + Telegram theme */
         * {
             box-sizing: border-box;
             user-select: none;
@@ -54,41 +53,56 @@
             max-width: 300px;
         }
 
-        /* Верхняя панель с информацией и кнопкой паузы */
+        /* Верхняя панель из трёх блоков */
         .top-panel {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: stretch;
             width: 100%;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .info-block {
+            flex: 1;
             background: rgba(255,255,255,0.1);
-            padding: 10px 15px;
-            border-radius: 30px;
-        }
-        .stats {
+            border-radius: 12px;
+            padding: 8px 5px;
+            text-align: center;
             display: flex;
-            gap: 15px;
-            font-size: 18px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-width: 0; /* для корректного сжатия */
+            backdrop-filter: blur(2px);
         }
-        .stats div span {
+        .info-label {
+            font-size: 12px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .info-value {
+            font-size: 22px;
             font-weight: bold;
             color: var(--tg-theme-button-color, #4CAF50);
+            line-height: 1.2;
         }
         #pause-button {
+            width: 100%;
+            height: 100%;
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            font-size: 24px;
+            border-radius: 12px;
+            font-size: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            line-height: 1;
+            aspect-ratio: 1 / 1; /* квадратный блок */
+            padding: 0;
         }
-        /* Игровое поле по центру */
+        /* Контейнер поля */
         .board-container {
             display: flex;
             justify-content: center;
@@ -101,7 +115,7 @@
             height: 600px;
             touch-action: none;
         }
-
+        /* Модальные окна */
         .overlay {
             position: fixed;
             top: 0;
@@ -145,15 +159,16 @@
         .modal button:last-child {
             margin-bottom: 0;
         }
-        /* Адаптация для маленьких экранов */
         @media (max-width: 350px) {
             canvas#board {
                 width: 250px;
                 height: 500px;
             }
-            .stats {
-                font-size: 16px;
-                gap: 10px;
+            .info-value {
+                font-size: 18px;
+            }
+            .info-label {
+                font-size: 10px;
             }
         }
     </style>
@@ -168,13 +183,19 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
-        <!-- Верхняя панель -->
+        <!-- Три блока сверху -->
         <div class="top-panel">
-            <div class="stats">
-                <div>💰 <span id="score">0</span></div>
-                <div>📊 <span id="level">0</span></div>
+            <div class="info-block">
+                <div class="info-label">SCORE</div>
+                <div class="info-value" id="score">0</div>
             </div>
-            <button id="pause-button" title="Пауза">⏸</button>
+            <div class="info-block">
+                <div class="info-label">LVL</div>
+                <div class="info-value" id="level">0</div>
+            </div>
+            <div class="info-block" style="padding: 0;">
+                <button id="pause-button" title="Пауза">⏸</button>
+            </div>
         </div>
 
         <!-- Центрированное поле -->
