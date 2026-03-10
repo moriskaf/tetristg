@@ -54,18 +54,20 @@
             max-width: 300px;
         }
 
-        /* Верхняя панель */
+        /* Верхняя панель: SCORE и LVL ближе к центру, пауза справа */
         .top-panel {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             width: 100%;
-            gap: 4px;
+            gap: 8px;
             margin-bottom: 5px;
             height: 36px;
+            padding-left: 20px;   /* отступ слева для смещения к центру */
+            padding-right: 10px;
         }
         .info-block {
-            flex: 1;
+            flex: 0 0 auto;
             background: rgba(255,255,255,0.1);
             border-radius: 6px;
             height: 100%;
@@ -73,15 +75,15 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            min-width: 45px;       /* фиксированная ширина для компактности */
+            padding: 0 5px;
             backdrop-filter: blur(2px);
         }
         .pause-block {
-            flex: 1;
+            margin-left: auto;      /* прижимает кнопку паузы к правому краю */
             height: 100%;
             display: flex;
-            justify-content: flex-end;
             align-items: center;
-            padding-right: 2px;
         }
         .info-label {
             font-size: 8px;
@@ -112,13 +114,14 @@
             padding: 0;
         }
 
-        /* Контейнер поля + NEXT */
+        /* Контейнер поля + NEXT (поле центрируется, NEXT уменьшен и смещён правее) */
         .board-container {
             display: flex;
             gap: 8px;
             justify-content: center;
             align-items: flex-start;
             width: 100%;
+            padding-left: 10px;     /* дополнительный сдвиг вправо для центрирования поля */
         }
         canvas#board {
             background: #000;
@@ -132,21 +135,21 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            margin-left: auto;
+            margin-left: auto;       /* прижимает NEXT к правому краю */
         }
         .next-label {
-            font-size: 10px;
+            font-size: 9px;          /* чуть меньше */
             text-transform: uppercase;
             opacity: 0.8;
         }
         canvas#nextCanvas {
             background: #000;
             border: 2px solid var(--tg-theme-hint-color, #555);
-            width: 70px;
-            height: 70px;
+            width: 60px;             /* уменьшенный размер */
+            height: 60px;
         }
 
-        /* Панель управления (крест) */
+        /* Панель управления (крест): поворот сверху, движение снизу */
         .controls {
             display: flex;
             flex-direction: column;
@@ -238,8 +241,8 @@
                 height: 500px;
             }
             canvas#nextCanvas {
-                width: 60px;
-                height: 60px;
+                width: 50px;          /* ещё меньше на узких экранах */
+                height: 50px;
             }
             .ctrl-btn {
                 width: 60px;
@@ -253,8 +256,8 @@
                 height: 440px;
             }
             canvas#nextCanvas {
-                width: 50px;
-                height: 50px;
+                width: 45px;
+                height: 45px;
             }
             .ctrl-btn {
                 width: 50px;
@@ -274,7 +277,7 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
-        <!-- Верхняя панель -->
+        <!-- Верхняя панель (SCORE и LVL ближе к центру) -->
         <div class="top-panel">
             <div class="info-block">
                 <div class="info-label">SCORE</div>
@@ -289,7 +292,7 @@
             </div>
         </div>
 
-        <!-- Поле + NEXT (прижато к правому краю) -->
+        <!-- Поле (центрировано) + NEXT (уменьшен и прижат вправо) -->
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
             <div class="next-piece">
@@ -300,7 +303,7 @@
 
         <!-- Кнопки крестом: поворот сверху, движение снизу -->
         <div class="controls">
-            <div class="ctrl-row"></div> <!-- отступ сверху -->
+            <div class="ctrl-row"></div> <!-- пустой ряд для отступа -->
             <div class="ctrl-row">
                 <button class="ctrl-btn" id="rotate">↻</button>
             </div>
