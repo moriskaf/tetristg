@@ -30,29 +30,52 @@ const SHAPES = [
     { shape: [[1,1,0],[0,1,1]], color: '#f00000' }
 ];
 
-// ---------- КЛАСС TETROMINO ----------
-class Tetromino {
-    constructor(shapeIndex) {
-        const data = SHAPES[shapeIndex];
-        this.shape = data.shape.map(row => [...row]);
-        this.color = data.color;
-        this.x = Math.floor((COLS - this.shape[0].length) / 2);
-        this.y = 0;
+// ---------- КЛАСС ЧАСТИЦЫ ДЛЯ ВЗРЫВА ----------
+class Particle {
+    constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 4; // скорость по X
+        this.vy = (Math.random() - 1) * 3;   // скорость по Y (в основном вверх)
+        this.size = Math.random() * 4 + 2;   // размер от 2 до 6
+        this.color = color;
+        this.alpha = 1;
+        this.life = 1; // от 1 до 0
+        this.decay = 0.02 + Math.random() * 0.03; // скорость затухания
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.2;
     }
-    rotate() {
-        return this.shape[0].map((_, i) => this.shape.map(row => row[i]).reverse());
+
+    update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.1; // небольшая гравитация
+        this.vx *= 0.99; // трение
+        this.vy *= 0.99;
+        this.life -= this.decay;
+        this.alpha = this.life;
+        this.rotation += this.rotationSpeed;
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+        ctx.restore();
     }
 }
 
-// ---------- КЛАСС BOARD (эффект «бум» за 3 кадра) ----------
+// ---------- КЛАСС BOARD (с частицами) ----------
 class Board {
     constructor() {
         this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
         this.score = 0;
         this.level = 0;
         this.lines = 0;
-        this.linesToAnimate = [];
-        this.animationTimer = 60;
+        this.particles = []; // массив частиц для анимации
     }
     addPiece(piece) {
         piece.shape.forEach((row, dy) => {
@@ -84,10 +107,21 @@ class Board {
         let cleared = 0;
         for (let y = ROWS - 1; y >= 0; ) {
             if (this.grid[y].every(cell => cell !== null)) {
-                this.linesToAnimate.push(y);
+                // Создаём частицы для каждого блока в этой строке
+                for (let x = 0; x < COLS; x++) {
+                    const color = this.grid[y][x];
+                    // Каждый блок разбиваем на несколько частиц
+                    for (let i = 0; i < 5; i++) {
+                        const px = x * BLOCK_SIZE + BLOCK_SIZE/2 + (Math.random() - 0.5) * 10;
+                        const py = y * BLOCK_SIZE + BLOCK_SIZE/2 + (Math.random() - 0.5) * 10;
+                        this.particles.push(new Particle(px, py, color));
+                    }
+                }
+                // Удаляем строку
                 this.grid.splice(y, 1);
                 this.grid.unshift(Array(COLS).fill(null));
                 cleared++;
+                // Не увеличиваем y, так как строка удалена
             } else {
                 y--;
             }
@@ -96,13 +130,11 @@ class Board {
             this.lines += cleared;
             this.score += cleared * 100 * (this.level + 1);
             this.level = Math.floor(this.lines / 10);
-            // Очень быстрая анимация: всего 3 кадра
-            this.animationTimer = 3;
         }
     }
     draw(ctx) {
+        // Отрисовка сетки
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        // Отрисовка всех клеток
         for (let y = 0; y < ROWS; y++) {
             for (let x = 0; x < COLS; x++) {
                 if (this.grid[y][x]) {
@@ -115,28 +147,13 @@ class Board {
             }
         }
 
-        // Эффект исчезновения (3 кадра)
-        if (this.animationTimer > 0) {
-            const step = 3 - this.animationTimer; // 0,1,2
-            if (step === 0) {
-                // Кадр 1: ярко-белый
-                ctx.globalAlpha = 1;
-                ctx.fillStyle = '#ffffff';
-            } else if (step === 1) {
-                // Кадр 2: оранжевый полупрозрачный
-                ctx.globalAlpha = 0.7;
-                ctx.fillStyle = '#ffaa00';
-            } else {
-                // Кадр 3: прозрачный (почти незаметно, но для завершения)
-                ctx.globalAlpha = 0;
-            }
-            this.linesToAnimate.forEach(y => {
-                ctx.fillRect(0, y * BLOCK_SIZE, ctx.canvas.width, BLOCK_SIZE-1);
-            });
-            ctx.globalAlpha = 1;
-            this.animationTimer--;
-            if (this.animationTimer === 0) {
-                this.linesToAnimate = [];
+        // Отрисовка и обновление частиц
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.update();
+            p.draw(ctx);
+            if (p.life <= 0 || p.y > ctx.canvas.height + 50) {
+                this.particles.splice(i, 1);
             }
         }
     }
