@@ -254,7 +254,7 @@ class Game {
         if (this.nextPiece) {
             const shape = this.nextPiece.shape;
             const color = this.nextPiece.color;
-            const blockSize = 20; // 100 / 5 = 20
+            const blockSize = 20;
             const cols = shape[0].length;
             const rows = shape.length;
             const offsetX = (100 - cols * blockSize) / 2;
@@ -356,7 +356,7 @@ exitToMenu.addEventListener('click', () => {
     pauseMenu.classList.add('hidden');
 });
 
-// --- Кнопки управления (три) ---
+// --- Кнопки управления (четыре) ---
 document.getElementById('move-left').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(-1, 0);
@@ -369,6 +369,12 @@ document.getElementById('move-right').addEventListener('click', () => {
         currentGame.draw();
     }
 });
+document.getElementById('rotate').addEventListener('click', () => {
+    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
+        currentGame.rotate();
+        currentGame.draw();
+    }
+});
 document.getElementById('soft-drop').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(0, 1); // мягкое падение на одну клетку
@@ -376,24 +382,7 @@ document.getElementById('soft-drop').addEventListener('click', () => {
     }
 });
 
-// --- Поворот по касанию поля ---
-canvas.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
-        currentGame.rotate();
-        currentGame.draw();
-    }
-});
-// Для мобильных touchstart срабатывает быстрее, но click тоже подходит. Используем оба, но с предотвращением двойного срабатывания.
-canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault(); // предотвращаем скролл
-    if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
-        currentGame.rotate();
-        currentGame.draw();
-    }
-}, { passive: false });
-
-// --- Обработка клавиатуры (оставим как опцию) ---
+// --- Обработка клавиатуры (опционально) ---
 document.addEventListener('keydown', (e) => {
     if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
     if (currentGame.paused) return;
@@ -407,7 +396,7 @@ document.addEventListener('keydown', (e) => {
     currentGame.draw();
 });
 
-// --- Запрет скролла при касаниях холста (дублируется, но оставим) ---
+// --- Запрет скролла при касаниях холста ---
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
 }, { passive: false });
