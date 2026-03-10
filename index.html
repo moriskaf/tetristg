@@ -147,20 +147,17 @@
             height: 70px;
         }
 
-        /* Панель управления (три ряда: поворот, влево/вправо, вниз) */
+        /* Панель управления в виде сетки 3x3 (как стрелочный блок) */
         .controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            grid-template-rows: auto auto auto;
             gap: 8px;
+            justify-items: center;
+            align-items: center;
             width: 100%;
             margin-top: 12px;
             margin-bottom: 5px;
-        }
-        .ctrl-row {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
         }
         .ctrl-btn {
             width: 70px;
@@ -182,6 +179,23 @@
             opacity: 0.7;
             transform: translateY(2px);
             box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+        /* Распределение кнопок по сетке */
+        #rotate {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        #move-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        #move-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        #soft-drop {
+            grid-column: 2;
+            grid-row: 3;
         }
 
         /* Модальные окна */
@@ -314,18 +328,12 @@
             </div>
         </div>
 
-        <!-- Кнопки управления: поворот сверху, влево/вправо посередине, вниз снизу -->
+        <!-- Кнопки управления в виде стрелочного блока -->
         <div class="controls">
-            <div class="ctrl-row">
-                <button class="ctrl-btn" id="rotate">↻</button>
-            </div>
-            <div class="ctrl-row">
-                <button class="ctrl-btn" id="move-left">←</button>
-                <button class="ctrl-btn" id="move-right">→</button>
-            </div>
-            <div class="ctrl-row">
-                <button class="ctrl-btn" id="soft-drop">↓</button>
-            </div>
+            <button class="ctrl-btn" id="rotate">↻</button>
+            <button class="ctrl-btn" id="move-left">←</button>
+            <button class="ctrl-btn" id="move-right">→</button>
+            <button class="ctrl-btn" id="soft-drop">↓</button>
         </div>
     </div>
 

@@ -356,7 +356,7 @@ exitToMenu.addEventListener('click', () => {
     pauseMenu.classList.add('hidden');
 });
 
-// --- Кнопки управления (крест) ---
+// --- Кнопки управления (ID соответствуют HTML) ---
 document.getElementById('move-left').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
         currentGame.move(-1, 0);
@@ -377,7 +377,7 @@ document.getElementById('rotate').addEventListener('click', () => {
 });
 document.getElementById('soft-drop').addEventListener('click', () => {
     if (currentGame && !currentGame.gameOver && !currentGame.paused && !gameWrapper.classList.contains('hidden')) {
-        currentGame.move(0, 1); // мягкое падение на одну клетку
+        currentGame.move(0, 1);
         currentGame.draw();
     }
 });
@@ -391,7 +391,7 @@ document.addEventListener('keydown', (e) => {
         case 'ArrowRight': currentGame.move(1, 0); break;
         case 'ArrowDown': currentGame.move(0, 1); break;
         case 'ArrowUp': currentGame.rotate(); break;
-        case ' ': currentGame.drop(); e.preventDefault(); break; // быстрый сброс
+        case ' ': currentGame.drop(); e.preventDefault(); break;
     }
     currentGame.draw();
 });
