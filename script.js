@@ -162,7 +162,6 @@ class Board {
         // Отрисовка и обновление частиц
         for (let i = this.particles.length - 1; i >= 0; i--) {
             const p = this.particles[i];
-            p.update();
             p.draw(ctx);
             if (p.life <= 0 || p.y > ctx.canvas.height + 50) {
                 this.particles.splice(i, 1);
@@ -208,10 +207,6 @@ class Game {
     }
 
     startAnimationLoop() {
-        // Останавливаем предыдущий цикл, если он был
-        if (this.animationFrame) {
-            cancelAnimationFrame(this.animationFrame);
-        }
         const loop = () => {
             if (!this.paused && !this.gameOver) {
                 // Обновляем частицы (независимо от игрового таймера)
@@ -274,9 +269,14 @@ class Game {
         this.board.addPiece(this.piece);
         this.board.clearLines();
         this.lockEffect = 5;
+        // Перезапускаем интервал с учётом нового уровня
         if (this.interval) {
-            this.stop(); // останавливаем интервал, чтобы перезапустить с новой скоростью
-            this.start(this.getIntervalTime());
+            clearInterval(this.interval);
+            this.interval = setInterval(() => {
+                if (!this.paused && !this.gameOver) {
+                    this.move(0, 1);
+                }
+            }, this.getIntervalTime());
         }
         if (!this.spawnNewPiece()) return;
     }
@@ -287,17 +287,18 @@ class Game {
     }
 
     start(intervalTime) {
-        // Запускаем только игровой интервал (движение вниз)
         this.interval = setInterval(() => {
             if (!this.paused && !this.gameOver) {
                 this.move(0, 1);
-                // Не вызываем draw() здесь, так как отрисовка идёт в RAF
             }
         }, intervalTime);
     }
 
     stop() {
-        if (this.interval) clearInterval(this.interval);
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
         if (this.animationFrame) {
             cancelAnimationFrame(this.animationFrame);
             this.animationFrame = null;
@@ -307,14 +308,15 @@ class Game {
     pause() {
         if (this.gameOver) return;
         this.paused = true;
-        this.stop(); // останавливаем интервал и RAF
+        if (this.interval) clearInterval(this.interval);
+        // RAF продолжает работать, но particles.update() не вызывается из-за paused
     }
 
     resume() {
         if (this.gameOver) return;
         this.paused = false;
         this.start(this.getIntervalTime());
-        this.startAnimationLoop(); // перезапускаем RAF
+        // RAF уже работает, просто снимаем paused
     }
 
     draw() {
@@ -400,7 +402,7 @@ class Game {
         this.gameOver = false;
         this.spawnNewPiece();
         this.start(this.getIntervalTime());
-        this.startAnimationLoop();
+        // RAF уже работает, не перезапускаем
         this.draw();
     }
 }
@@ -533,7 +535,10 @@ document.getElementById('restart').addEventListener('click', () => {
 loadRewardedAd();
 
 function startNewGame(canvas, nextCanvas) {
-    if (currentGame) currentGame.stop();
+    if (currentGame) {
+        currentGame.stop();
+        currentGame = null;
+    }
     // Сбрасываем мешок для новой игры
     Game.shapeBag = [];
     Game.bagIndex = 0;
