@@ -147,12 +147,12 @@
             height: 70px;
         }
 
-        /* Панель управления: плотный крест (поворот сверху, три кнопки снизу) */
+        /* Панель управления: кнопки с закруглениями и отступами */
         .controls {
             display: grid;
             grid-template-columns: 70px 70px 70px;
             grid-template-rows: 70px 70px;
-            gap: 0;
+            gap: 6px; /* небольшой зазор для аккуратных закруглений */
             justify-content: center;
             margin-top: 12px;
             margin-bottom: 5px;
@@ -163,7 +163,7 @@
             background: var(--tg-theme-button-color, #4CAF50);
             color: var(--tg-theme-button-text-color, white);
             border: none;
-            border-radius: 0; /* убираем скругление для плотного прилегания */
+            border-radius: 16px; /* закругление */
             font-size: 32px;
             display: flex;
             align-items: center;
@@ -171,10 +171,12 @@
             cursor: pointer;
             touch-action: manipulation;
             user-select: none;
-            box-shadow: none;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2); /* небольшая тень для объёма */
         }
         .ctrl-btn:active {
             opacity: 0.7;
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
         }
 
         /* Размещение кнопок по ячейкам */
@@ -259,9 +261,11 @@
             .controls {
                 grid-template-columns: 60px 60px 60px;
                 grid-template-rows: 60px 60px;
+                gap: 5px;
             }
             .ctrl-btn {
                 font-size: 28px;
+                border-radius: 14px;
             }
             .info-value {
                 font-size: 16px;
@@ -282,9 +286,11 @@
             .controls {
                 grid-template-columns: 50px 50px 50px;
                 grid-template-rows: 50px 50px;
+                gap: 4px;
             }
             .ctrl-btn {
                 font-size: 24px;
+                border-radius: 12px;
             }
             .info-value {
                 font-size: 14px;
@@ -329,7 +335,7 @@
             </div>
         </div>
 
-        <!-- Кнопки управления: плотный крест -->
+        <!-- Кнопки управления с закруглениями -->
         <div class="controls">
             <button class="ctrl-btn" id="rotate">↻</button>
             <button class="ctrl-btn" id="move-left">←</button>
