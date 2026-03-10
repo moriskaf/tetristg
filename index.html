@@ -147,11 +147,11 @@
             height: 70px;
         }
 
-        /* Панель управления в виде сетки 3x3 (как стрелочный блок) */
+        /* Панель управления как на клавиатуре: поворот сверху, три кнопки снизу */
         .controls {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
-            grid-template-rows: auto auto auto;
+            grid-template-rows: auto auto;
             gap: 8px;
             justify-items: center;
             align-items: center;
@@ -180,7 +180,7 @@
             transform: translateY(2px);
             box-shadow: 0 2px 0 rgba(0,0,0,0.2);
         }
-        /* Распределение кнопок по сетке */
+        /* Распределение кнопок */
         #rotate {
             grid-column: 2;
             grid-row: 1;
@@ -189,13 +189,13 @@
             grid-column: 1;
             grid-row: 2;
         }
+        #soft-drop {
+            grid-column: 2;
+            grid-row: 2;
+        }
         #move-right {
             grid-column: 3;
             grid-row: 2;
-        }
-        #soft-drop {
-            grid-column: 2;
-            grid-row: 3;
         }
 
         /* Модальные окна */
@@ -301,9 +301,9 @@
 
     <!-- Игровой экран -->
     <div id="game-wrapper" class="game-wrapper hidden">
-        <!-- Верхняя панель с центрированными индикаторами -->
+        <!-- Верхняя панель -->
         <div class="top-panel">
-            <div></div> <!-- левая пустая колонка -->
+            <div></div>
             <div class="center-indicators">
                 <div class="info-block">
                     <div class="info-label">SCORE</div>
@@ -319,7 +319,7 @@
             </div>
         </div>
 
-        <!-- Поле ровно по центру, NEXT справа -->
+        <!-- Поле + NEXT -->
         <div class="board-container">
             <canvas id="board" width="300" height="600"></canvas>
             <div class="next-piece">
@@ -328,33 +328,18 @@
             </div>
         </div>
 
-        <!-- Кнопки управления в виде стрелочного блока -->
+        <!-- Кнопки управления в точности как на клавиатуре -->
         <div class="controls">
             <button class="ctrl-btn" id="rotate">↻</button>
             <button class="ctrl-btn" id="move-left">←</button>
-            <button class="ctrl-btn" id="move-right">→</button>
             <button class="ctrl-btn" id="soft-drop">↓</button>
+            <button class="ctrl-btn" id="move-right">→</button>
         </div>
     </div>
 
-    <!-- Модалка Game Over -->
-    <div id="game-over" class="overlay hidden">
-        <div class="modal">
-            <h2>Игра окончена</h2>
-            <p>Счёт: <span id="final-score"></span></p>
-            <button id="watch-ad">Смотреть рекламу и продолжить</button>
-            <button id="restart">Начать заново</button>
-        </div>
-    </div>
-
-    <!-- Модалка паузы -->
-    <div id="pause-menu" class="overlay hidden">
-        <div class="modal">
-            <h2>Пауза</h2>
-            <button id="resume-button">Продолжить</button>
-            <button id="exit-to-menu">Выйти в меню</button>
-        </div>
-    </div>
+    <!-- Модалки -->
+    <div id="game-over" class="overlay hidden">...</div>
+    <div id="pause-menu" class="overlay hidden">...</div>
 
     <script src="script.js"></script>
 </body>
