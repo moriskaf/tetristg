@@ -28,7 +28,6 @@
             --hint-color: #555;
             --button-color: #4CAF50;
             --button-text: #fff;
-            --pattern-color: 255, 255, 255; /* для паттерна */
             background: var(--bg-color);
             color: var(--text-color);
         }
@@ -38,7 +37,6 @@
             --hint-color: #aaa;
             --button-color: #007aff;
             --button-text: #fff;
-            --pattern-color: 0, 0, 0;
         }
         .screen-container {
             position: relative;
@@ -59,6 +57,9 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
             opacity: 1;
             visibility: visible;
+            /* Для позиционирования псевдоэлемента */
+            position: relative;
+            overflow: hidden;
         }
         .menu.hidden, .game-wrapper.hidden {
             opacity: 0;
@@ -66,37 +67,39 @@
             pointer-events: none;
         }
 
-        /* ---------- Меню с паттерном ---------- */
-        .menu {
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(145deg, 
-                var(--bg-color) 0%, 
-                color-mix(in srgb, var(--bg-color) 80%, black) 100%);
-            border-radius: 30px;
-            padding: 30px 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
-        .menu::before {
+        /* ---------- Общий фон с разноцветными ромбиками ---------- */
+        .menu::before, .game-wrapper::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(45deg, rgba(var(--pattern-color), 0.02) 25%, transparent 25%),
-                linear-gradient(-45deg, rgba(var(--pattern-color), 0.02) 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, rgba(var(--pattern-color), 0.02) 75%),
-                linear-gradient(-45deg, transparent 75%, rgba(var(--pattern-color), 0.02) 75%);
-            background-size: 30px 30px;
-            background-position: 0 0, 0 15px, 15px -15px, -15px 0px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cdefs%3E%3Cpattern id='diamonds' patternUnits='userSpaceOnUse' width='40' height='40'%3E%3Cg transform='rotate(45 20 20)'%3E%3Crect width='20' height='20' fill='%23ff6b6b' opacity='0.15'/%3E%3Crect x='20' width='20' height='20' fill='%234ecdc4' opacity='0.15'/%3E%3Crect y='20' width='20' height='20' fill='%23ffe66d' opacity='0.15'/%3E%3Crect x='20' y='20' width='20' height='20' fill='%23c7b198' opacity='0.15'/%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23diamonds)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
             pointer-events: none;
             z-index: 1;
         }
-        .menu h1, .leaderboard-placeholder, .menu-buttons {
+        /* Для игрового экрана делаем паттерн чуть бледнее */
+        .game-wrapper::before {
+            opacity: 0.5; /* уменьшаем яркость, чтобы поле не терялось */
+        }
+
+        /* Контент поверх паттерна */
+        .menu h1, .leaderboard-placeholder, .menu-buttons,
+        .top-panel, .board-container, .controls {
             position: relative;
             z-index: 2;
+        }
+
+        /* ---------- Меню ---------- */
+        .menu {
+            background: linear-gradient(145deg, 
+                var(--bg-color) 0%, 
+                color-mix(in srgb, var(--bg-color) 80%, black) 100%);
+            border-radius: 30px;
+            padding: 30px 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
         }
         .menu h1 {
             font-size: 64px;
@@ -303,7 +306,7 @@
         #soft-drop { grid-column: 2; grid-row: 2; }
         #move-right { grid-column: 3; grid-row: 2; }
 
-        /* ---------- Модальные окна (с исправленным дизайном кнопок) ---------- */
+        /* ---------- Модальные окна ---------- */
         .overlay {
             position: fixed;
             top: 0;
@@ -363,7 +366,7 @@
             margin-bottom: 0;
         }
 
-        /* ---------- Модалка настроек (те же стили) ---------- */
+        /* ---------- Модалка настроек ---------- */
         .modal .setting-row {
             margin: 15px 0;
             text-align: left;
@@ -417,7 +420,7 @@
             box-shadow: 0 2px 0 color-mix(in srgb, var(--button-color) 60%, black);
         }
 
-        /* Адаптация для узких экранов */
+        /* Адаптация */
         @media (max-width: 460px) {
             .game-wrapper { max-width: 400px; }
             canvas#board { width: 250px; height: 500px; }
