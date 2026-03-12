@@ -57,8 +57,6 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
             opacity: 1;
             visibility: visible;
-            /* Для позиционирования псевдоэлемента */
-            position: relative;
             overflow: hidden;
         }
         .menu.hidden, .game-wrapper.hidden {
@@ -67,7 +65,7 @@
             pointer-events: none;
         }
 
-        /* ---------- Общий фон с разноцветными ромбиками ---------- */
+        /* ---------- Фон с разноцветными ромбиками ---------- */
         .menu::before, .game-wrapper::before {
             content: '';
             position: absolute;
@@ -163,6 +161,9 @@
         }
 
         /* ---------- Игровой экран (с правильным z-index) ---------- */
+        .game-wrapper {
+            /* для позиционирования дочерних элементов */
+        }
         .top-panel {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
@@ -236,7 +237,7 @@
             touch-action: none;
             justify-self: center;
             position: relative;
-            z-index: 20; /* выше фона */
+            z-index: 20;
         }
         .next-piece {
             grid-column: 3;
@@ -307,7 +308,7 @@
         #soft-drop { grid-column: 2; grid-row: 2; }
         #move-right { grid-column: 3; grid-row: 2; }
 
-        /* ---------- Модальные окна (исправленные кнопки) ---------- */
+        /* ---------- Модальные окна ---------- */
         .overlay {
             position: fixed;
             top: 0;
@@ -367,7 +368,7 @@
             margin-bottom: 0;
         }
 
-        /* ---------- Модалка настроек (специфичные стили) ---------- */
+        /* ---------- Модалка настроек ---------- */
         .modal .setting-row {
             margin: 15px 0;
             text-align: left;
@@ -421,7 +422,7 @@
             box-shadow: 0 2px 0 color-mix(in srgb, var(--button-color) 60%, black);
         }
 
-        /* ---------- Адаптация ---------- */
+        /* Адаптация */
         @media (max-width: 460px) {
             .game-wrapper { max-width: 400px; }
             canvas#board { width: 250px; height: 500px; }

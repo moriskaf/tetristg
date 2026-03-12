@@ -2,8 +2,8 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-// --- Переменные темы (переопределяются настройками) ---
-let currentTheme = 'system'; // 'light', 'dark', 'system'
+// --- Переменные темы и сложности ---
+let currentTheme = 'system';
 let currentDifficulty = 'normal';
 
 // Загрузка настроек из localStorage
@@ -18,26 +18,12 @@ function applyTheme() {
     const body = document.body;
     if (currentTheme === 'light') {
         body.classList.add('light-theme');
-        // Отключаем цвета Telegram
-        body.style.setProperty('--tg-theme-bg-color', '#f0f0f0');
-        body.style.setProperty('--tg-theme-text-color', '#222');
-        body.style.setProperty('--tg-theme-hint-color', '#aaa');
-        body.style.setProperty('--tg-theme-button-color', '#007aff');
-        body.style.setProperty('--tg-theme-button-text-color', '#fff');
+        // Принудительно задаём цвета через CSS-переменные (они уже есть в классе)
     } else if (currentTheme === 'dark') {
         body.classList.remove('light-theme');
-        body.style.setProperty('--tg-theme-bg-color', '#111');
-        body.style.setProperty('--tg-theme-text-color', '#fff');
-        body.style.setProperty('--tg-theme-hint-color', '#555');
-        body.style.setProperty('--tg-theme-button-color', '#4CAF50');
-        body.style.setProperty('--tg-theme-button-text-color', '#fff');
-    } else { // system - используем тему Telegram
+    } else { // system
         body.classList.remove('light-theme');
-        body.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color || '#111');
-        body.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color || '#fff');
-        body.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color || '#555');
-        body.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#4CAF50');
-        body.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#fff');
+        // Цвета из Telegram уже установлены в начале
     }
 }
 
@@ -57,7 +43,7 @@ function vibrate(pattern = 10) {
     }
 }
 
-// Константы
+// Константы игры
 const COLS = 10;
 const ROWS = 20;
 const BLOCK_SIZE = 30;
@@ -123,7 +109,7 @@ class Particle {
     }
 }
 
-// ---------- КЛАСС BOARD (с частицами и мусором) ----------
+// ---------- КЛАСС BOARD ----------
 class Board {
     constructor(difficulty) {
         this.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
@@ -159,18 +145,14 @@ class Board {
         }
         return false;
     }
-    // Добавление мусорной строки (для сложной сложности)
     addGarbageLine() {
         if (this.difficulty !== 'hard') return;
-        // С вероятностью 20% после каждой установки фигуры добавляем мусор
         if (Math.random() > 0.2) return;
-        // Удаляем верхнюю строку и сдвигаем всё вверх, снизу добавляем мусор
         this.grid.shift();
         const garbageRow = Array(COLS).fill(null);
-        // Заполняем случайными блоками (кроме одного прохода)
         for (let x = 0; x < COLS; x++) {
-            if (Math.random() > 0.3) { // 70% заполнено
-                garbageRow[x] = '#555'; // серый цвет мусора
+            if (Math.random() > 0.3) {
+                garbageRow[x] = '#555';
             }
         }
         this.grid.push(garbageRow);
@@ -223,7 +205,7 @@ class Board {
     }
 }
 
-// ---------- КЛАСС GAME (с учётом сложности) ----------
+// ---------- КЛАСС GAME ----------
 class Game {
     static shapeBag = [];
     static bagIndex = 0;
@@ -260,12 +242,6 @@ class Game {
         this.startAnimationLoop();
     }
 
-    getIntervalTime() {
-        // Базовая скорость в зависимости от сложности
-        const baseSpeed = { easy: 600, normal: 500, hard: 400 }[this.difficulty] || 500;
-        return Math.max(100, baseSpeed - this.board.level * 30);
-    }
-
     startAnimationLoop() {
         const loop = () => {
             if (!this.paused && !this.gameOver) {
@@ -275,6 +251,11 @@ class Game {
             this.animationFrame = requestAnimationFrame(loop);
         };
         this.animationFrame = requestAnimationFrame(loop);
+    }
+
+    getIntervalTime() {
+        const baseSpeed = { easy: 600, normal: 500, hard: 400 }[this.difficulty] || 500;
+        return Math.max(100, baseSpeed - this.board.level * 30);
     }
 
     spawnNewPiece() {
@@ -323,7 +304,6 @@ class Game {
     lockPiece() {
         this.board.addPiece(this.piece);
         this.board.clearLines();
-        // Добавляем мусор, если сложность hard
         if (this.difficulty === 'hard') {
             this.board.addGarbageLine();
         }
@@ -353,8 +333,14 @@ class Game {
     }
 
     stop() {
-        if (this.interval) clearInterval(this.interval);
-        if (this.animationFrame) cancelAnimationFrame(this.animationFrame);
+        if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null;
+        }
+        if (this.animationFrame) {
+            cancelAnimationFrame(this.animationFrame);
+            this.animationFrame = null;
+        }
     }
 
     pause() {
@@ -371,9 +357,11 @@ class Game {
 
     draw() {
         this.board.draw(this.ctx);
+
         if (this.piece && !this.gameOver) {
             this.ctx.shadowBlur = 15;
             this.ctx.shadowColor = this.piece.color + '80';
+
             if (this.lockEffect > 0) {
                 const scale = 1 + 0.1 * (this.lockEffect / 5);
                 this.ctx.translate(
@@ -386,6 +374,7 @@ class Game {
                     -(this.piece.y + this.piece.shape.length / 2) * BLOCK_SIZE
                 );
             }
+
             this.piece.shape.forEach((row, dy) => {
                 row.forEach((value, dx) => {
                     if (value) {
@@ -394,6 +383,7 @@ class Game {
                     }
                 });
             });
+
             if (this.lockEffect > 0) {
                 this.ctx.setTransform(1, 0, 0, 1, 0, 0);
                 this.lockEffect--;
@@ -401,6 +391,7 @@ class Game {
             this.ctx.shadowBlur = 0;
             this.ctx.shadowColor = 'transparent';
         }
+
         this.drawNext();
         document.getElementById('score').textContent = this.board.score;
         document.getElementById('level').textContent = this.board.level;
@@ -476,7 +467,10 @@ const gameWrapper = document.getElementById('game-wrapper');
 const canvas = document.getElementById('board');
 const nextCanvas = document.getElementById('nextCanvas');
 
-// Кнопки меню
+// Загружаем настройки
+loadSettings();
+
+// Кнопка PLAY
 document.getElementById('play-button').addEventListener('click', () => {
     menu.classList.add('hidden');
     gameWrapper.classList.remove('hidden');
@@ -484,9 +478,9 @@ document.getElementById('play-button').addEventListener('click', () => {
     vibrate(20);
 });
 
+// Кнопка Settings
 document.getElementById('settings-button').addEventListener('click', () => {
     document.getElementById('settings-modal').classList.remove('hidden');
-    // Установить активную кнопку темы
     const theme = currentTheme;
     document.querySelectorAll('.theme-buttons button').forEach(btn => btn.classList.remove('active'));
     if (theme === 'light') document.getElementById('theme-light').classList.add('active');
@@ -495,7 +489,7 @@ document.getElementById('settings-button').addEventListener('click', () => {
     document.getElementById('difficulty-select').value = currentDifficulty;
 });
 
-// Настройки
+// Настройки темы
 document.getElementById('theme-light').addEventListener('click', () => {
     document.querySelectorAll('.theme-buttons button').forEach(btn => btn.classList.remove('active'));
     document.getElementById('theme-light').classList.add('active');
@@ -508,6 +502,8 @@ document.getElementById('theme-system').addEventListener('click', () => {
     document.querySelectorAll('.theme-buttons button').forEach(btn => btn.classList.remove('active'));
     document.getElementById('theme-system').classList.add('active');
 });
+
+// Сохранение настроек
 document.getElementById('save-settings').addEventListener('click', () => {
     let theme = 'system';
     if (document.getElementById('theme-light').classList.contains('active')) theme = 'light';
@@ -518,7 +514,7 @@ document.getElementById('save-settings').addEventListener('click', () => {
     vibrate(10);
 });
 
-// Кнопка "Пауза"
+// Кнопка паузы
 const pauseButton = document.getElementById('pause-button');
 const pauseMenu = document.getElementById('pause-menu');
 const resumeButton = document.getElementById('resume-button');
@@ -581,7 +577,7 @@ document.getElementById('soft-drop').addEventListener('click', () => {
     }
 });
 
-// Клавиатура
+// Клавиатура (опционально)
 document.addEventListener('keydown', (e) => {
     if (!currentGame || currentGame.gameOver || gameWrapper.classList.contains('hidden')) return;
     if (currentGame.paused) return;
@@ -595,7 +591,7 @@ document.addEventListener('keydown', (e) => {
     currentGame.draw();
 });
 
-// Запрет скролла
+// Запрет скролла на canvas
 canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
 
 // Модалки Game Over
@@ -612,7 +608,7 @@ document.getElementById('restart').addEventListener('click', () => {
     startNewGame(canvas, nextCanvas, currentDifficulty);
 });
 
-// Закрытие модалок по клику вне (не обязательно, но можно)
+// Закрытие модалок по клику вне
 document.querySelectorAll('.overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) {
@@ -621,10 +617,10 @@ document.querySelectorAll('.overlay').forEach(overlay => {
     });
 });
 
-// Загрузка настроек и предзагрузка рекламы
-loadSettings();
+// Предзагрузка рекламы
 loadRewardedAd();
 
+// Функция старта новой игры
 function startNewGame(canvas, nextCanvas, difficulty) {
     if (currentGame) {
         currentGame.stop();
